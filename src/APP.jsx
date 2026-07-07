@@ -9,11 +9,13 @@ function App() {
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const apiBaseUrl = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : 'https://my-fleet-app-backend.onrender.com')).replace(/\/$/, '');
+
   const fetchDashboardData = async (userEmail) => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:5000/api/dashboard/stats?email=${encodeURIComponent(userEmail)}`
+        `${apiBaseUrl}/api/dashboard/stats?email=${encodeURIComponent(userEmail)}`
       );
       const data = await response.json();
 
@@ -35,7 +37,7 @@ function App() {
     setDashboardData(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      const response = await fetch(`${apiBaseUrl}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
