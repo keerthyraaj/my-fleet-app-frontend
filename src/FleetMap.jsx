@@ -52,7 +52,7 @@ function getMarkerColor(status) {
     case "charging":
       return "#3b82f6";
     case "maintenance":
-      return "#111827";
+      return "#ef4444";
     default:
       return "#6b7280";
   }
@@ -76,7 +76,8 @@ function FleetMap({ fleets }) {
     >
       <TileLayer
         attribution="&copy; OpenStreetMap contributors"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        url="https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
+        maxZoom={20}
       />
 
       <FitFleetBounds fleets={positionedFleets} />
