@@ -1,22 +1,25 @@
 // src/App.jsx
 import React, { useState } from 'react';
+import FleetMap from './FleetMap';
 
 function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
+  const [fleetMapData, setFleetMapData] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [activeView, setActiveView] = useState('dashboard');
 
   const apiBaseUrl = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : 'https://my-fleet-app-backend.onrender.com')).replace(/\/$/, '');
 
-  const fetchDashboardData = async (userEmail) => {
+  const fetchDashboardData = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `${apiBaseUrl}/api/dashboard/stats?email=${encodeURIComponent(userEmail)}`
-      );
+      const response = await fetch(`${apiBaseUrl}/api/dashboard/stats`, {
+        credentials: 'include'
+      });
       const data = await response.json();
 
       if (response.ok) {
@@ -31,6 +34,23 @@ function App() {
     }
   };
 
+  const fetchFleetMapData = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/fleets`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setFleetMapData(data.fleets || []);
+      } else {
+        setFleetMapData([]);
+      }
+    } catch (error) {
+      setFleetMapData([]);
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMessage('');
@@ -40,6 +60,7 @@ function App() {
       const response = await fetch(`${apiBaseUrl}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
       });
 
@@ -47,7 +68,8 @@ function App() {
 
       if (response.ok) {
         setLoggedInUser(data.fullName);
-        await fetchDashboardData(data.email);
+        setActiveView('dashboard');
+        await fetchDashboardData();
       } else {
         setErrorMessage(data.message);
       }
@@ -56,11 +78,29 @@ function App() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch(`${apiBaseUrl}/api/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (error) {
+      // Ignore logout errors and clear UI locally
+    }
+
     setLoggedInUser(null);
     setDashboardData(null);
+    setFleetMapData([]);
+    setActiveView('dashboard');
     setEmail('');
     setPassword('');
+  };
+
+  const handleOpenFleetMap = async () => {
+    setActiveView('map');
+    if (fleetMapData.length === 0) {
+      await fetchFleetMapData();
+    }
   };
 
   const renderDashboard = () => {
@@ -75,9 +115,14 @@ function App() {
             <p style={{ margin: 0, color: '#4b5563' }}>Fleet operations dashboard</p>
             <h1 style={{ margin: '6px 0 0', color: '#111827' }}>Welcome, {loggedInUser}</h1>
           </div>
-          <button onClick={handleLogout} style={{ padding: '10px 16px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#111827', color: 'white' }}>
-            Logout
-          </button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button onClick={handleOpenFleetMap} style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#0f766e', color: 'white' }}>
+              🗺️ Map
+            </button>
+            <button onClick={handleLogout} style={{ padding: '10px 16px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#111827', color: 'white' }}>
+              Logout
+            </button>
+          </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
@@ -140,6 +185,23 @@ function App() {
       </div>
     );
   };
+
+  if (loggedInUser && activeView === 'map') {
+    return (
+      <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div>
+            <h2 style={{ margin: 0 }}>Fleet map</h2>
+            <p style={{ margin: '4px 0 0', color: '#6b7280' }}>Hover over a dot to see fleet details.</p>
+          </div>
+          <button onClick={() => setActiveView('dashboard')} style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#111827', color: 'white' }}>
+            Back to dashboard
+          </button>
+        </div>
+        <FleetMap fleets={fleetMapData} />
+      </div>
+    );
+  }
 
   if (loggedInUser) {
     return renderDashboard();
