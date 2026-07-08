@@ -76,8 +76,8 @@ function FleetMap({ fleets }) {
     >
       <TileLayer
         attribution="&copy; OpenStreetMap contributors"
-        url="https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
-        maxZoom={20}
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        maxZoom={19}
       />
 
       <FitFleetBounds fleets={positionedFleets} />
