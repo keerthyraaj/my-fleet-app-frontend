@@ -1,6 +1,7 @@
 // src/App.jsx
 import React, { useState } from 'react';
 import FleetMap from './FleetMap';
+import FleetScheduleDemo from './FleetScheduleDemo';
 
 function App() {
   const [email, setEmail] = useState('');
@@ -103,6 +104,13 @@ function App() {
     }
   };
 
+  const handleOpenFleetScheduleDemo = async () => {
+    setActiveView('schedule-demo');
+    if (fleetMapData.length === 0) {
+      await fetchFleetMapData();
+    }
+  };
+
   const renderDashboard = () => {
     const stats = dashboardData?.stats || {};
     const fleetTypes = dashboardData?.fleetTypes || [];
@@ -118,6 +126,9 @@ function App() {
           <div style={{ display: 'flex', gap: '10px' }}>
             <button onClick={handleOpenFleetMap} style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#0f766e', color: 'white' }}>
               🗺️ Map
+            </button>
+            <button onClick={handleOpenFleetScheduleDemo} style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#7c3aed', color: 'white' }}>
+              🗓️ Schedule demo
             </button>
             <button onClick={handleLogout} style={{ padding: '10px 16px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#111827', color: 'white' }}>
               Logout
@@ -200,6 +211,16 @@ function App() {
         </div>
         <FleetMap fleets={fleetMapData} />
       </div>
+    );
+  }
+
+  if (loggedInUser && activeView === 'schedule-demo') {
+    return (
+      <FleetScheduleDemo
+        fleets={fleetMapData}
+        apiBaseUrl={apiBaseUrl}
+        onBack={() => setActiveView('dashboard')}
+      />
     );
   }
 
