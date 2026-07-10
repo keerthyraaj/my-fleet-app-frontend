@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import FleetMap from './FleetMap';
 import FleetScheduleDemo from './FleetScheduleDemo';
+import AdminConsole from './AdminConsole';
 
 function App() {
   const [email, setEmail] = useState('');
@@ -68,7 +69,10 @@ function App() {
       const data = await response.json();
 
       if (response.ok) {
-        setLoggedInUser(data.fullName);
+        setLoggedInUser({
+          fullName: data.fullName,
+          role: data.role // <-- Tracks structural roles globally inside your React UI
+      });
         setActiveView('dashboard');
         await fetchDashboardData();
       } else {
@@ -121,9 +125,17 @@ function App() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
             <p style={{ margin: 0, color: '#4b5563' }}>Fleet operations dashboard</p>
-            <h1 style={{ margin: '6px 0 0', color: '#111827' }}>Welcome, {loggedInUser}</h1>
+            <h1 style={{ margin: '6px 0 0', color: '#111827' }}>Welcome, {loggedInUser?.fullName}</h1>
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
+            {loggedInUser?.role === 'admin' && (
+              <button 
+              onClick={() => setActiveTab ? setActiveView('admin-console') : setActiveView('admin-console')} 
+              style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#d97706', color: 'white', fontWeight: 'bold' }}
+              >
+                🛠️ Admin Panel
+              </button>
+         )}
             <button onClick={handleOpenFleetMap} style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#0f766e', color: 'white' }}>
               🗺️ Map
             </button>
@@ -222,6 +234,15 @@ function App() {
         onBack={() => setActiveView('dashboard')}
       />
     );
+  }
+  
+  if (loggedInUser && activeView === 'admin-console') {
+  return (
+    <AdminConsole 
+      apiBaseUrl={apiBaseUrl} 
+      onBack={() => setActiveView('dashboard')} 
+    />
+   );
   }
 
   if (loggedInUser) {
