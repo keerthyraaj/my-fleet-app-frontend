@@ -129,13 +129,13 @@ function App() {
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
             {loggedInUser?.role === 'admin' && (
-              <button 
-              onClick={() => setActiveTab ? setActiveView('admin-console') : setActiveView('admin-console')} 
-              style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#d97706', color: 'white', fontWeight: 'bold' }}
+              <button
+                onClick={() => setActiveView('admin-console')}
+                style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#d97706', color: 'white', fontWeight: 'bold' }}
               >
                 🛠️ Admin Panel
               </button>
-         )}
+            )}
             <button onClick={handleOpenFleetMap} style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#0f766e', color: 'white' }}>
               🗺️ Map
             </button>
