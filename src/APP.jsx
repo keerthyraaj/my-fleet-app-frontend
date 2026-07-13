@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FleetMap from './FleetMap';
 import FleetScheduleDemo from './FleetScheduleDemo';
 import AdminConsole from './AdminConsole';
