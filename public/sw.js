@@ -1,63 +1,50 @@
-const CACHE_NAME = 'fleet-track-v1';
+const CACHE_NAME = 'fleet-track-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
   '/icon-192x192.png',
-  '/icon-512x512.png'
+  '/icon-512x512.png',
+  '/offline.html'
 ];
 
-// Install Event - Caches App Shell Layout Structure
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
   self.skipWaiting();
 });
 
-// Activate Event - Clear Expired Storage Pools
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
-    })
+    caches.keys().then((keys) => Promise.all(
+      keys.map((key) => key !== CACHE_NAME && caches.delete(key))
+    ))
   );
   self.clients.claim();
 });
 
-// Fetch Interception Event
 self.addEventListener('fetch', (event) => {
-  // Pass dynamic API and map tracking backend telemetry completely through the live network
-  if (event.request.url.includes('/api/') || event.request.url.includes('tile.openstreetmap')) {
+  const { request } = event;
+  const requestUrl = new URL(request.url);
+
+  if (requestUrl.pathname === '/sw.js') {
     return;
   }
 
-  // Fallback onto cached elements for local app structural UI assets if offline
+  if (requestUrl.pathname.startsWith('/api/') || requestUrl.hostname !== self.location.hostname) {
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
+    fetch(request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
         }
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
         return networkResponse;
-      }).catch(() => {
-        // Fallback catch placeholder
-      });
-    })
+      })
+      .catch(() => caches.match(request).then((cachedResponse) => cachedResponse || caches.match('/offline.html')))
   );
 });
