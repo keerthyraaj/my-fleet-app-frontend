@@ -6,6 +6,20 @@ import AdminConsole from './AdminConsole';
 
 function App() {
   const [email, setEmail] = useState('');
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnlineStatus = () => setIsOnline(true);
+    const handleOfflineStatus = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnlineStatus);
+    window.addEventListener('offline', handleOfflineStatus);
+
+    return () => {
+      window.removeEventListener('online', handleOnlineStatus);
+      window.removeEventListener('offline', handleOfflineStatus);
+    };
+  }, []);
   const [password, setPassword] = useState('');
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
@@ -122,6 +136,11 @@ function App() {
 
     return (
       <div style={{ maxWidth: '1100px', margin: '40px auto', padding: '24px', fontFamily: 'sans-serif' }}>
+        {!isOnline && (
+          <div style={{ padding: '12px', background: '#fef3c7', border: '1px solid #fde68a', color: '#92400e', borderRadius: '8px', marginBottom: '16px', fontWeight: 'bold', textAlign: 'center' }}>
+            ⚠️ Working Offline. Live GPS map telemetry tracking updates are temporarily paused.
+          </div>
+        )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
             <p style={{ margin: 0, color: '#4b5563' }}>Fleet operations dashboard</p>
