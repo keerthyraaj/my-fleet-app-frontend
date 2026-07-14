@@ -293,7 +293,7 @@ function App() {
     <div className="flex items-center justify-center min-h-screen bg-black text-zinc-200 p-4">
       <div className="w-full max-w-[400px] bg-zinc-950 border border-zinc-900 p-8 rounded-sm shadow-2xl">
         <div className="mb-8 border-b border-zinc-900 pb-4">
-          <h2 className="text-lg font-semibold tracking-tight text-white uppercase">Fleet Management Login</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-white uppercase">LOGIN</h2>
         </div>
         
         {errorMessage && <p className="p-3 mb-4 bg-red-950/20 border border-red-950 text-red-400 text-xs rounded-sm">{errorMessage}</p>}
