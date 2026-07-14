@@ -77,7 +77,7 @@ function RouteDemoLayer({ schedule, selectedFleet }) {
         serviceUrl: 'https://router.project-osrm.org/route/v1',
       }),
       lineOptions: {
-        styles: [{ color: '#90ee90', weight: 5, opacity: 0.9 }],
+        styles: [{ color: '#10b981', weight: 4, opacity: 0.85 }],
       },
       show: false,
       addWaypoints: false,
@@ -166,44 +166,40 @@ function RouteDemoLayer({ schedule, selectedFleet }) {
       {routeCoordinates.length > 1 && (
         <Polyline
           positions={routeCoordinates}
-          pathOptions={{ color: '#90ee90', weight: 5, opacity: 0.9 }}
+          pathOptions={{ color: '#10b981', weight: 4, opacity: 0.85 }}
         />
       )}
 
       <CircleMarker
         center={[schedule.start_lat, schedule.start_long]}
-        radius={7}
-        pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.95, weight: 2 }}
+        radius={6}
+        pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 1, weight: 2 }}
         eventHandlers={{ click: handleRouteClick }}
       >
-        <Tooltip direction="top">Hover and click to animate</Tooltip>
+        <Tooltip direction="top">Click waypoint node to simulate route</Tooltip>
       </CircleMarker>
 
       <CircleMarker
         center={[schedule.end_lat, schedule.end_long]}
-        radius={7}
-        pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.95, weight: 2 }}
+        radius={6}
+        pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 1, weight: 2 }}
       >
-        <Tooltip direction="top">End point</Tooltip>
+        <Tooltip direction="top">Destination waypoint</Tooltip>
       </CircleMarker>
 
       {currentPosition && (
         <CircleMarker
           center={currentPosition}
           radius={8}
-          pathOptions={{ color: '#111827', fillColor: '#f59e0b', fillOpacity: 0.95, weight: 3 }}
+          pathOptions={{ color: '#000000', fillColor: '#ffffff', fillOpacity: 1, weight: 3 }}
         >
           <Popup>
-            <div style={{ minWidth: '220px' }}>
-              <strong>{selectedFleet?.vehicle_type || 'Fleet'}</strong>
-              <br />
-              Start: {formatTimestamp(schedule.start_time)}
-              <br />
-              End: {formatTimestamp(schedule.end_time)}
-              <br />
-              Speed: {Number(schedule.speed_kmh || 0).toFixed(2)} km/h
-              <br />
-              Distance: {Number(routeDistanceKm || selectedFleet?.distance_covered_km || 0).toFixed(2)} km
+            <div className="min-w-[220px] bg-zinc-950 text-zinc-100 p-1 text-xs space-y-1">
+              <strong className="text-white text-sm font-semibold uppercase tracking-wide block border-b border-zinc-800 pb-1">{selectedFleet?.vehicle_type || 'Fleet Asset'}</strong>
+              <div><span className="text-zinc-500 font-mono">START:</span> {formatTimestamp(schedule.start_time)}</div>
+              <div><span className="text-zinc-500 font-mono">END:</span> {formatTimestamp(schedule.end_time)}</div>
+              <div><span className="text-zinc-500 font-mono">SPEED:</span> {Number(schedule.speed_kmh || 0).toFixed(2)} km/h</div>
+              <div><span className="text-zinc-500 font-mono">DISTANCE:</span> {Number(routeDistanceKm || selectedFleet?.distance_covered_km || 0).toFixed(2)} km</div>
             </div>
           </Popup>
         </CircleMarker>
@@ -264,7 +260,8 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, onBack }) {
 
   return (
     <div className="max-w-5xl mx-auto my-12 p-8 bg-zinc-950 border border-zinc-900 rounded-sm text-zinc-200 antialiased">
-      <div className="flex justify-between items-center mb-6 border-b border-zinc-900 pb-4">
+      {/* Module Title Bar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-zinc-900 pb-5">
         <div>
           <span className="text-[10px] font-bold tracking-widest text-zinc-500 font-mono uppercase block mb-1">Schedule operations Node</span>
           <h2 className="text-lg font-semibold tracking-tight text-white uppercase font-mono">Schedule demo</h2>
@@ -274,12 +271,59 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, onBack }) {
         </button>
       </div>
       
-      {/* Your original working application calendar/table functions render cleanly right below */}
       <div className="space-y-6">
-        {/* 
-          If your original zip file had a map or specific layout list code here, 
-          it will now show up fully functional and styled in clean dark text.
-        */}
+        {/* Fleet Hardware Selector Layout */}
+        <div>
+          <label className="block mb-2 text-[10px] font-bold tracking-wider text-zinc-500 uppercase font-mono">Select Fleet Unit for Simulation Route:</label>
+          <div className="flex flex-wrap gap-2">
+            {fleets.map((fleet) => (
+              <button
+                key={fleet.fleet_id}
+                onClick={() => setSelectedFleetId(fleet.fleet_id)}
+                className={`px-4 py-2 border font-mono text-xs font-semibold rounded-sm transition-colors duration-150 uppercase ${selectedFleetId === fleet.fleet_id ? 'bg-emerald-500 text-black border-emerald-500' : 'bg-black border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'}`}
+              >
+                {fleet.vehicle_type} ({fleet.fleet_id.slice(0, 8)})
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Status Messaging Panels */}
+        {isLoading && (
+          <div className="p-4 bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-mono rounded-sm animate-pulse">
+            PINGING ROUTING MATRICES... CALCULATING VECTOR COORDS
+          </div>
+        )}
+
+        {errorMessage && !isLoading && (
+          <div className="p-4 bg-zinc-900 border border-zinc-800 text-zinc-500 text-xs font-mono rounded-sm">
+            STATUS LOG: {errorMessage}
+          </div>
+        )}
+
+        {/* Live Map Canvas Component Frame */}
+        {schedule && !isLoading && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-black border border-zinc-900 p-4 rounded-sm font-mono text-xs text-zinc-400">
+              <div><span className="text-zinc-600">SCHEDULE ID:</span> <span className="text-zinc-200 font-semibold">{schedule.schedule_id}</span></div>
+              <div><span className="text-zinc-600">TARGET DISPLACEMENT SPEED:</span> <span className="text-zinc-200 font-semibold">{schedule.speed_kmh} km/h</span></div>
+            </div>
+
+            <div className="h-[450px] w-full border border-zinc-900 bg-black rounded-sm overflow-hidden relative shadow-inner z-0">
+              <MapContainer
+                center={[schedule.start_lat, schedule.start_long]}
+                zoom={13}
+                style={{ height: '100%', width: '100%', background: '#000000' }}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                />
+                <RouteDemoLayer schedule={schedule} selectedFleet={selectedFleet} />
+              </MapContainer>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
