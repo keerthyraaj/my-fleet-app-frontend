@@ -254,11 +254,11 @@ function App() {
       <div className="p-6 bg-black min-h-screen text-zinc-100 antialiased font-sans">
         <div className="flex justify-between items-center mb-6 border-b border-zinc-900 pb-4">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight text-white font-mono uppercase">REALTIME TELEMETRY STREAM</h2>
-            <p className="text-xs text-zinc-500 mt-0.5">Asset coordinate verification vectors active.</p>
+            <h2 className="text-lg font-semibold tracking-tight text-white uppercase font-mono">Fleet map</h2>
+            <p className="text-xs text-zinc-500 mt-0.5">Hover over a dot to see fleet details.</p>
           </div>
           <button onClick={() => setActiveView('dashboard')} className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium text-xs font-mono tracking-wide rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-150">
-            TERMINAL MONITOR
+            Back to dashboard
           </button>
         </div>
         <FleetMap fleets={fleetMapData} />
