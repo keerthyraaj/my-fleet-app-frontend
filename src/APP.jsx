@@ -136,70 +136,70 @@ function App() {
       <div className="max-w-7xl mx-auto px-6 py-12 bg-black min-h-screen text-zinc-100 antialiased">
         
         {!isOnline && (
-          <div className="p-3 bg-zinc-900 border-l-2 border-red-500 text-red-400 text-xs font-mono mb-8 tracking-wide">
-            CRITICAL NOTICE: OFFLINE — telemetry stream buffered locally.
+          <div className="p-3 bg-zinc-900 border-l-2 border-emerald-500 text-zinc-300 text-xs mb-8 tracking-wide">
+            Working Offline. Live GPS map telemetry tracking updates are temporarily paused.
           </div>
         )}
 
-        {/* Snowbotix Industrial Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 border-b border-zinc-900 pb-8">
+        {/* Clean Header Area */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-12 border-b border-zinc-900 pb-8">
           <div>
-            <span className="text-[10px] font-bold tracking-[0.2em] text-emerald-500 uppercase block mb-1">Fleet Management Module</span>
-            <h1 className="text-xl font-semibold tracking-tight text-white uppercase">
-              Control Center <span className="text-zinc-600 font-light font-sans">/ {loggedInUser?.fullName}</span>
+            <p className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase block mb-1">Fleet operations dashboard</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-white">
+              Welcome, {loggedInUser?.fullName}
             </h1>
           </div>
-          <div className="flex flex-wrap gap-2 text-xs font-mono">
+          <div className="flex flex-wrap gap-2 text-xs">
             {loggedInUser?.role === 'admin' && (
               <button
                 onClick={() => setActiveView('admin-console')}
-                className="px-4 py-2 bg-emerald-500 text-black font-semibold rounded-sm hover:bg-emerald-400 transition-colors duration-200"
+                className="px-4 py-2 bg-emerald-500 text-black font-semibold rounded-sm hover:bg-emerald-400 transition-colors duration-150"
               >
-                ADMIN NODE
+                🛠| Admin Panel
               </button>
             )}
             <button 
               onClick={handleOpenFleetMap} 
-              className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-200"
+              className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-150"
             >
-              TELEMETRY MAP
+              🗺| Map
             </button>
             <button 
               onClick={handleOpenFleetScheduleDemo} 
-              className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-200"
+              className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-150"
             >
-              SCHEDULER
+              🗓| Schedule demo
             </button>
-            <button onClick={handleLogout} className="px-4 py-2 text-zinc-600 hover:text-zinc-400 transition-colors duration-200">
-              DISCONNECT
+            <button onClick={handleLogout} className="px-4 py-2 text-zinc-500 hover:text-zinc-300 transition-colors duration-150">
+              Logout
             </button>
           </div>
         </div>
 
-        {/* Flat Metric Cells */}
+        {/* Original Metric Cards Restored */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           <div className="border border-zinc-900 bg-zinc-950 p-6 rounded-sm">
-            <span className="text-[9px] font-bold tracking-widest text-zinc-500 uppercase block font-mono">TRACKED HARDWARE UNITS</span>
+            <span className="text-[10px] font-medium tracking-widest text-zinc-500 uppercase block">Assigned fleets</span>
             <div className="mt-3 text-4xl font-light text-white tracking-tight">{stats.fleetCount || 0}</div>
           </div>
           <div className="border border-zinc-900 bg-zinc-950 p-6 rounded-sm">
-            <span className="text-[9px] font-bold tracking-widest text-zinc-500 uppercase block font-mono">TOTAL DISPLACEMENT DISPATCHED</span>
+            <span className="text-[10px] font-medium tracking-widest text-zinc-500 uppercase block">Distance covered</span>
             <div className="mt-3 text-4xl font-light text-white tracking-tight">
-              {Number(stats.totalDistanceKm || 0).toFixed(2)} <span className="text-xs text-zinc-600 font-normal tracking-normal">KM</span>
+              {Number(stats.totalDistanceKm || 0).toFixed(2)} <span className="text-xs text-zinc-500 font-normal tracking-normal">km</span>
             </div>
           </div>
           <div className="border border-zinc-900 bg-zinc-950 p-6 rounded-sm">
-            <span className="text-[9px] font-bold tracking-widest text-zinc-500 uppercase block font-mono">SYSTEM BATT MEAN POTENTIAL</span>
-            <div className="mt-3 text-4xl font-light text-emerald-500 tracking-tight">
-              {Number(stats.averageBattery || 0).toFixed(0)}<span className="text-sm text-emerald-700 font-normal tracking-normal">%</span>
+            <span className="text-[10px] font-medium tracking-widest text-zinc-500 uppercase block">Average battery</span>
+            <div className="mt-3 text-4xl font-light text-white tracking-tight">
+              {Number(stats.averageBattery || 0).toFixed(0)}<span className="text-sm text-zinc-500 font-normal tracking-normal">%</span>
             </div>
           </div>
         </div>
 
-        {/* Industrial Section Splits */}
+        {/* Content Grids */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 border border-zinc-900 bg-zinc-950 rounded-sm p-6">
-            <h3 className="text-xs font-semibold tracking-wider text-zinc-400 uppercase mb-6 font-mono">ASSET SPECIATION MATRICES</h3>
+            <h3 className="text-xs font-semibold tracking-wider text-zinc-400 uppercase mb-6">Fleet type distribution</h3>
             {fleetTypes.length > 0 ? (
               <div className="flex items-end gap-6 h-56 pt-4">
                 {fleetTypes.map((item) => (
@@ -210,27 +210,27 @@ function App() {
                         className="w-full max-w-[28px] bg-zinc-800 hover:bg-emerald-500 transition-colors duration-150 rounded-t-sm"
                       />
                     </div>
-                    <p className="mt-3 text-[9px] font-mono font-medium tracking-wide uppercase text-zinc-500 truncate w-full text-center">{item.type}</p>
-                    <p className="mt-1 font-mono font-semibold text-white text-xs">{item.count}</p>
+                    <p className="mt-3 text-[10px] tracking-wide uppercase text-zinc-500 truncate w-full text-center">{item.type}</p>
+                    <p className="mt-1 font-semibold text-white text-xs">{item.count}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-zinc-700 py-16 text-center text-xs font-mono">NO ACTIVE ALLOCATIONS RECORDED.</p>
+              <p className="text-zinc-600 py-16 text-center text-xs font-mono">No fleet data is available yet. Add data to the database to see charts.</p>
             )}
           </div>
 
           <div className="border border-zinc-900 bg-zinc-950 rounded-sm p-6">
-            <h3 className="text-xs font-semibold tracking-wider text-zinc-400 uppercase mb-6 font-mono">HARDWARE OPERATION LIFECYCLE</h3>
+            <h3 className="text-xs font-semibold tracking-wider text-zinc-400 uppercase mb-6">Operational status</h3>
             <div className="flex flex-col gap-5">
               {[
-                { label: 'STANDBY (IDLE)', value: stats.idleFleets || 0, color: 'bg-zinc-800' },
-                { label: 'DEPLOYED (ACTIVE)', value: stats.activeFleets || 0, color: 'bg-emerald-500' },
-                { label: 'RECHARGING CELLS', value: stats.chargingFleets || 0, color: 'bg-zinc-600' },
-                { label: 'MAINTENANCE DECOUPLING', value: stats.maintenanceFleets || 0, color: 'bg-zinc-700' }
+                { label: 'Idle', value: stats.idleFleets || 0, color: 'bg-zinc-800' },
+                { label: 'Active', value: stats.activeFleets || 0, color: 'bg-emerald-500' },
+                { label: 'Charging', value: stats.chargingFleets || 0, color: 'bg-zinc-600' },
+                { label: 'Maintenance', value: stats.maintenanceFleets || 0, color: 'bg-zinc-700' }
               ].map((item) => (
                 <div key={item.label} className="text-xs">
-                  <div className="flex justify-between mb-1 text-[10px] font-mono font-semibold text-zinc-500">
+                  <div className="flex justify-between mb-1 text-[10px] font-semibold text-zinc-500">
                     <span>{item.label}</span>
                     <span className="text-white font-bold">{item.value}</span>
                   </div>
@@ -290,42 +290,39 @@ function App() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-black text-zinc-200 antialiased p-4">
-      <div className="w-full max-w-[420px] bg-zinc-950 border border-zinc-900 p-8 rounded-sm shadow-2xl">
+    <div className="flex items-center justify-center min-h-screen bg-black text-zinc-200 p-4">
+      <div className="w-full max-w-[400px] bg-zinc-950 border border-zinc-900 p-8 rounded-sm shadow-2xl">
         <div className="mb-8 border-b border-zinc-900 pb-4">
-          <span className="text-[10px] font-bold tracking-[0.2em] text-emerald-500 uppercase font-mono block mb-1">Command Interface</span>
-          <h2 className="text-xl font-semibold tracking-tight text-white uppercase font-mono">SYSTEM ACCESS AUTH</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-white uppercase">Fleet Management Login</h2>
         </div>
         
-        {errorMessage && <p className="p-3 mb-4 bg-red-950/20 border border-red-950 text-red-400 text-xs font-mono font-medium tracking-wide">{errorMessage}</p>}
+        {errorMessage && <p className="p-3 mb-4 bg-red-950/20 border border-red-950 text-red-400 text-xs rounded-sm">{errorMessage}</p>}
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-[10px] font-bold tracking-wider text-zinc-500 uppercase font-mono mb-2">NETWORK GATEWAY ALIAS (EMAIL)</label>
+            <label className="block text-[10px] font-bold tracking-wider text-zinc-500 uppercase mb-2">Email Address:</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full p-3 bg-black border border-zinc-800 text-white text-sm rounded-sm focus:outline-none focus:border-zinc-700 transition-colors font-mono"
-              placeholder="operator@network.com"
+              className="w-full p-3 bg-black border border-zinc-800 text-white text-sm rounded-sm focus:outline-none focus:border-zinc-700 transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold tracking-wider text-zinc-500 uppercase font-mono mb-2">CRYPTOGRAPHIC PASSWORD TOKEN</label>
+            <label className="block text-[10px] font-bold tracking-wider text-zinc-500 uppercase mb-2">Password:</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full p-3 bg-black border border-zinc-800 text-white text-sm rounded-sm focus:outline-none focus:border-zinc-700 transition-colors font-mono"
-              placeholder="••••••••••••"
+              className="w-full p-3 bg-black border border-zinc-800 text-white text-sm rounded-sm focus:outline-none focus:border-zinc-700 transition-colors"
             />
           </div>
 
-          <button type="submit" className="w-full py-3 bg-emerald-500 text-black font-mono font-bold text-xs tracking-widest uppercase rounded-sm hover:bg-emerald-400 transition-colors duration-200 mt-2">
-            {isLoading ? 'ESTABLISHING LINK...' : 'ESTABLISH LINK'}
+          <button type="submit" className="w-full py-3 bg-emerald-500 text-black font-bold text-xs tracking-widest uppercase rounded-sm hover:bg-emerald-400 transition-colors duration-200 mt-2">
+            {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
       </div>
