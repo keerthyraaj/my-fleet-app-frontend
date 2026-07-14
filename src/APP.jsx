@@ -135,89 +135,103 @@ function App() {
     const maxBarValue = Math.max(...fleetTypes.map((item) => item.count), 1);
 
     return (
-      <div style={{ maxWidth: '1100px', margin: '40px auto', padding: '24px', fontFamily: 'sans-serif' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 24px', backgroundColor: '#030712', minHeight: '100vh' }}>
+        
         {!isOnline && (
-          <div style={{ padding: '12px', background: '#fef3c7', border: '1px solid #fde68a', color: '#92400e', borderRadius: '8px', marginBottom: '16px', fontWeight: 'bold', textAlign: 'center' }}>
-            ⚠️ Working Offline. Live GPS map telemetry tracking updates are temporarily paused.
+          <div style={{ padding: '14px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#ef4444', borderRadius: '8px', marginBottom: '24px', fontWeight: '500', textAlign: 'center', boxShadow: '0 0 15px rgba(239,68,68,0.15)', backdropFilter: 'blur(4px)' }}>
+            ⚡ SYSTEM LINK INTERRUPTED — OPERATING ON LOCAL CACHED TELEMETRY
           </div>
         )}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', borderBottom: '1px solid #1f2937', paddingBottom: '24px' }}>
           <div>
-            <p style={{ margin: 0, color: '#4b5563' }}>Fleet operations dashboard</p>
-            <h1 style={{ margin: '6px 0 0', color: '#111827' }}>Welcome, {loggedInUser?.fullName}</h1>
+            <p style={{ margin: 0, color: '#06b6d4', fontSize: '12px', fontWeight: '700', tracking: '0.15em', textTransform: 'uppercase', fontfamily: 'Orbitron' }}>Autonomous Command Node</p>
+            <h1 style={{ margin: '4px 0 0', color: '#ffffff', fontSize: '32px', fontFamily: 'Orbitron', fontWeight: '700' }}>WELCOME, {loggedInUser?.fullName?.toUpperCase()}</h1>
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '12px' }}>
             {loggedInUser?.role === 'admin' && (
               <button
                 onClick={() => setActiveView('admin-console')}
-                style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#d97706', color: 'white', fontWeight: 'bold' }}
+                style={{ padding: '10px 20px', cursor: 'pointer', border: '1px solid #d97706', borderRadius: '4px', background: 'rgba(217, 119, 6, 0.1)', color: '#fbbf24', fontFamily: 'Orbitron', fontSize: '13px', fontWeight: '700', transition: 'all 0.3s', boxShadow: '0 0 10px rgba(217,119,6,0.1)' }}
+                onMouseEnter={(e) => { e.target.style.background = '#d97706'; e.target.style.color = '#000000'; }}
+                onMouseLeave={(e) => { e.target.style.background = 'rgba(217, 119, 6, 0.1)'; e.target.style.color = '#fbbf24'; }}
               >
-                🛠️ Admin Panel
+                🛠️ CORE CONTROL
               </button>
             )}
-            <button onClick={handleOpenFleetMap} style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#0f766e', color: 'white' }}>
-              🗺️ Map
+            <button 
+              onClick={handleOpenFleetMap} 
+              style={{ padding: '10px 20px', cursor: 'pointer', border: '1px solid #0f766e', borderRadius: '4px', background: 'rgba(15, 118, 110, 0.1)', color: '#2dd4bf', fontFamily: 'Orbitron', fontSize: '13px', fontWeight: '700', transition: 'all 0.3s' }}
+              onMouseEnter={(e) => { e.target.style.background = '#0f766e'; e.target.style.color = '#ffffff'; }}
+              onMouseLeave={(e) => { e.target.style.background = 'rgba(15, 118, 110, 0.1)'; e.target.style.color = '#2dd4bf'; }}
+            >
+              🗺️ MAP MATRIX
             </button>
-            <button onClick={handleOpenFleetScheduleDemo} style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#7c3aed', color: 'white' }}>
-              🗓️ Schedule demo
+            <button 
+              onClick={handleOpenFleetScheduleDemo} 
+              style={{ padding: '10px 20px', cursor: 'pointer', border: '1px solid #7c3aed', borderRadius: '4px', background: 'rgba(124, 58, 237, 0.1)', color: '#a78bfa', fontFamily: 'Orbitron', fontSize: '13px', fontWeight: '700', transition: 'all 0.3s' }}
+              onMouseEnter={(e) => { e.target.style.background = '#7c3aed'; e.target.style.color = '#ffffff'; }}
+              onMouseLeave={(e) => { e.target.style.background = 'rgba(124, 58, 237, 0.1)'; e.target.style.color = '#a78bfa'; }}
+            >
+              🗓️ CHRONO FLOW
             </button>
-            <button onClick={handleLogout} style={{ padding: '10px 16px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#111827', color: 'white' }}>
-              Logout
+            <button onClick={handleLogout} style={{ padding: '10px 20px', cursor: 'pointer', border: '1px solid #374151', borderRadius: '4px', background: '#111827', color: '#9ca3af', fontFamily: 'Orbitron', fontSize: '13px', transition: 'all 0.3s' }}>
+              DISCONNECT
             </button>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-          <div style={{ background: 'linear-gradient(135deg, #2563eb, #4f46e5)', color: 'white', padding: '18px', borderRadius: '12px' }}>
-            <p style={{ margin: 0, opacity: 0.9 }}>Assigned fleets</p>
-            <h2 style={{ margin: '8px 0 0', fontSize: '28px' }}>{stats.fleetCount || 0}</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+          <div style={{ background: '#09090b', border: '1px solid #1f2937', padding: '24px', borderRadius: '8px', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.6)' }}>
+            <p style={{ margin: 0, fontSize: '11px', textTransform: 'uppercase', tracking: '0.1em', color: '#6b7280', fontFamily: 'Orbitron' }}>ACTIVE ASSET REGISTRY</p>
+            <h2 style={{ margin: '12px 0 0', fontSize: '36px', color: '#ffffff', fontFamily: 'Orbitron', fontWeight: '900', textShadow: '0 0 10px rgba(255,255,255,0.1)' }}>{stats.fleetCount || 0} <span style={{ fontSize: '14px', color: '#4b5563' }}>UNITS</span></h2>
           </div>
-          <div style={{ background: 'linear-gradient(135deg, #0f766e, #14b8a6)', color: 'white', padding: '18px', borderRadius: '12px' }}>
-            <p style={{ margin: 0, opacity: 0.9 }}>Distance covered</p>
-            <h2 style={{ margin: '8px 0 0', fontSize: '28px' }}>{Number(stats.totalDistanceKm || 0).toFixed(2)} km</h2>
+          <div style={{ background: '#09090b', border: '1px solid #1f2937', padding: '24px', borderRadius: '8px', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.6)' }}>
+            <p style={{ margin: 0, fontSize: '11px', textTransform: 'uppercase', tracking: '0.1em', color: '#6b7280', fontFamily: 'Orbitron' }}>AGGREGATE DISPLACEMENT</p>
+            <h2 style={{ margin: '12px 0 0', fontSize: '36px', color: '#06b6d4', fontFamily: 'Orbitron', fontWeight: '900', textShadow: '0 0 15px rgba(6,182,212,0.2)' }}>{Number(stats.totalDistanceKm || 0).toFixed(2)} <span style={{ fontSize: '14px', color: '#0f766e' }}>KM</span></h2>
           </div>
-          <div style={{ background: 'linear-gradient(135deg, #b45309, #f59e0b)', color: 'white', padding: '18px', borderRadius: '12px' }}>
-            <p style={{ margin: 0, opacity: 0.9 }}>Average battery</p>
-            <h2 style={{ margin: '8px 0 0', fontSize: '28px' }}>{Number(stats.averageBattery || 0).toFixed(0)}%</h2>
+          <div style={{ background: '#09090b', border: '1px solid #1f2937', padding: '24px', borderRadius: '8px', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.6)' }}>
+            <p style={{ margin: 0, fontSize: '11px', textTransform: 'uppercase', tracking: '0.1em', color: '#6b7280', fontFamily: 'Orbitron' }}>POWER MATRIX MEDIAN</p>
+            <h2 style={{ margin: '12px 0 0', fontSize: '36px', color: '#10b981', fontFamily: 'Orbitron', fontWeight: '900', textShadow: '0 0 15px rgba(16,185,129,0.2)' }}>{Number(stats.averageBattery || 0).toFixed(0)}<span style={{ fontSize: '20px', color: '#047857' }}>%</span></h2>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 0.9fr', gap: '20px' }}>
-          <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '18px' }}>
-            <h3 style={{ marginTop: 0 }}>Fleet type distribution</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '24px' }}>
+          <div style={{ background: '#09090b', border: '1px solid #1f2937', borderRadius: '8px', padding: '24px' }}>
+            <h3 style={{ marginTop: 0, fontFamily: 'Orbitron', fontSize: '14px', tracking: '0.05em', color: '#ffffff', borderBottom: '1px solid #1f2937', paddingBottom: '12px' }}>VEHICLE VECTOR VECTORING</h3>
             {fleetTypes.length > 0 ? (
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', height: '220px', marginTop: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px', height: '240px', marginTop: '24px' }}>
                 {fleetTypes.map((item) => (
                   <div key={item.type} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <div style={{ width: '100%', height: '180px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-                      <div style={{ width: '100%', maxWidth: '70px', height: `${Math.max((item.count / maxBarValue) * 100, 8)}%`, background: '#2563eb', borderRadius: '8px 8px 0 0' }} />
+                      <div style={{ width: '100%', maxWidth: '44px', height: `${Math.max((item.count / maxBarValue) * 100, 6)}%`, background: 'linear-gradient(to top, #0f766e, #06b6d4)', borderRadius: '2px 2px 0 0', boxShadow: '0 0 15px rgba(6,182,212,0.3)' }} />
                     </div>
-                    <p style={{ margin: '8px 0 0', fontSize: '13px', textAlign: 'center', color: '#374151' }}>{item.type}</p>
-                    <p style={{ margin: '2px 0 0', fontWeight: 700 }}>{item.count}</p>
+                    <p style={{ margin: '12px 0 0', fontSize: '11px', fontFamily: 'Orbitron', textTransform: 'uppercase', color: '#9ca3af' }}>{item.type}</p>
+                    <p style={{ margin: '2px 0 0', fontFamily: 'Orbitron', fontWeight: 700, color: '#ffffff' }}>{item.count}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p style={{ color: '#6b7280' }}>No fleet data is available yet. Add data to the database to see charts.</p>
+              <p style={{ color: '#4b5563', padding: '40px 0', textAlign: 'center' }}>NO TELEMETRY LOGS COMPILED.</p>
             )}
           </div>
 
-          <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '18px' }}>
-            <h3 style={{ marginTop: 0 }}>Operational status</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
+          <div style={{ background: '#09090b', border: '1px solid #1f2937', borderRadius: '8px', padding: '24px' }}>
+            <h3 style={{ marginTop: 0, fontFamily: 'Orbitron', fontSize: '14px', tracking: '0.05em', color: '#ffffff', borderBottom: '1px solid #1f2937', paddingBottom: '12px' }}>TACTICAL RUNTIME STATUS</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '24px' }}>
               {[
-                { label: 'Idle', value: stats.idleFleets || 0, color: '#6b7280' },
-                { label: 'Active', value: stats.activeFleets || 0, color: '#10b981' },
-                { label: 'Charging', value: stats.chargingFleets || 0, color: '#f59e0b' },
-                { label: 'Maintenance', value: stats.maintenanceFleets || 0, color: '#ef4444' }
+                { label: 'STANDBY (IDLE)', value: stats.idleFleets || 0, color: '#6b7280', glow: 'transparent' },
+                { label: 'OPERATIONAL (ACTIVE)', value: stats.activeFleets || 0, color: '#06b6d4', glow: 'rgba(6,182,212,0.3)' },
+                { label: 'RECHARGING CELL', value: stats.chargingFleets || 0, color: '#10b981', glow: 'rgba(16,185,129,0.3)' },
+                { label: 'CRITICAL MAINTENANCE', value: stats.maintenanceFleets || 0, color: '#ef4444', glow: 'rgba(239,68,68,0.3)' }
               ].map((item) => (
                 <div key={item.label}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '11px', fontFamily: 'Orbitron', color: '#9ca3af' }}>
                     <span>{item.label}</span>
-                    <strong>{item.value}</strong>
+                    <span style={{ color: '#ffffff', fontWeight: '700' }}>{item.value}</span>
                   </div>
-                  <div style={{ height: '8px', background: '#e5e7eb', borderRadius: '999px', overflow: 'hidden' }}>
-                    <div style={{ width: `${Math.min((item.value / Math.max(stats.fleetCount || 1, 1)) * 100, 100)}%`, height: '100%', background: item.color, borderRadius: '999px' }} />
+                  <div style={{ height: '6px', background: '#111827', borderRadius: '1px', overflow: 'hidden' }}>
+                    <div style={{ width: `${Math.min((item.value / Math.max(stats.fleetCount || 1, 1)) * 100, 100)}%`, height: '100%', background: item.color, boxShadow: `0 0 8px ${item.glow}` }} />
                   </div>
                 </div>
               ))}
@@ -227,7 +241,7 @@ function App() {
       </div>
     );
   };
-
+  
   if (loggedInUser && activeView === 'map') {
     return (
       <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
