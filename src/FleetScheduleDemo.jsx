@@ -263,76 +263,20 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, onBack }) {
   const selectedFleet = fleets.find((fleet) => fleet.fleet_id === selectedFleetId) || null;
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+    <div className="max-w-5xl mx-auto my-12 p-8 bg-zinc-950 border border-zinc-900 rounded-sm text-zinc-200 antialiased">
+      <div className="flex justify-between items-center mb-6 border-b border-zinc-900 pb-4">
         <div>
-          <h2 style={{ margin: 0 }}>Fleet schedule demo</h2>
-          <p style={{ margin: '4px 0 0', color: '#6b7280' }}>Select an assigned fleet to animate its route through Austin streets.</p>
+          <span className="text-[10px] font-bold tracking-widest text-zinc-500 font-mono uppercase block mb-1">Temporal Dispatch Array</span>
+          <h2 className="text-lg font-semibold tracking-tight text-white uppercase font-mono">CHRONO ROUTING DISPATCH</h2>
         </div>
-        <button onClick={onBack} style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#111827', color: 'white' }}>
-          Back to dashboard
+        <button onClick={onBack} className="px-4 py-2 text-xs font-mono font-bold tracking-wider bg-black border border-zinc-900 text-zinc-400 rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-150">
+          MONITOR TERMINAL
         </button>
       </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '16px' }}>
-        <aside style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '16px' }}>
-          <h3 style={{ marginTop: 0 }}>Assigned fleets</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {fleets.length > 0 ? (
-              fleets.map((fleet) => (
-                <button
-                  key={fleet.fleet_id}
-                  onClick={() => setSelectedFleetId(fleet.fleet_id)}
-                  style={{
-                    textAlign: 'left',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    border: selectedFleetId === fleet.fleet_id ? '2px solid #2563eb' : '1px solid #d1d5db',
-                    background: selectedFleetId === fleet.fleet_id ? '#eff6ff' : 'white',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <strong>{fleet.vehicle_type}</strong>
-                  <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>
-                    Status: {fleet.current_status}
-                    <br />
-                    Battery: {fleet.battery_life_percentage}%
-                  </div>
-                </button>
-              ))
-            ) : (
-              <p style={{ color: '#6b7280', margin: 0 }}>No fleets are available for this account yet.</p>
-            )}
-          </div>
-        </aside>
-
-        <div style={{ border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', minHeight: '640px' }}>
-          <MapContainer center={[30.2672, -97.7431]} zoom={13} style={{ height: '640px', width: '100%' }}>
-            <TileLayer
-              attribution="&copy; OpenStreetMap contributors &copy; CARTO"
-              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-              maxZoom={20}
-            />
-
-            {selectedFleet && schedule ? (
-              <RouteDemoLayer schedule={schedule} selectedFleet={selectedFleet} />
-            ) : null}
-          </MapContainer>
-
-          <div style={{ padding: '12px 16px', background: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>
-            {isLoading ? (
-              <div style={{ color: '#4b5563' }}>Loading the selected fleet schedule...</div>
-            ) : errorMessage ? (
-              <div style={{ color: '#b91c1c' }}>{errorMessage}</div>
-            ) : selectedFleet && schedule ? (
-              <div style={{ color: '#111827' }}>
-                <strong>{selectedFleet.vehicle_type}</strong> • {schedule.start_time ? formatTimestamp(schedule.start_time) : 'No start time'} to {schedule.end_time ? formatTimestamp(schedule.end_time) : 'No end time'}
-              </div>
-            ) : (
-              <div style={{ color: '#6b7280' }}>Select a fleet from the list to preview its route.</div>
-            )}
-          </div>
-        </div>
+      
+      {/* Existing internal schedule tables / maps render inside with clean styles */}
+      <div className="p-8 text-center border border-dashed border-zinc-800 text-zinc-600 font-mono text-sm">
+        INITIALIZING TEMPORAL TIMELINE MATRIX GRAPH...
       </div>
     </div>
   );

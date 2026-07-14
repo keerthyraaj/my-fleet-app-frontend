@@ -65,76 +65,105 @@ export default function AdminConsole({ apiBaseUrl, onBack }) {
   };
 
   return (
-    <div style={{ maxWidth: '900px', margin: '40px auto', padding: '20px', fontFamily: 'sans-serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <h2>🛠️ System Administration</h2>
-        <button onClick={onBack} style={{ padding: '8px 14px', cursor: 'pointer', background: '#111827', color: 'white', border: 'none', borderRadius: '6px' }}>
-          Back to Dashboard
+    <div className="max-w-5xl mx-auto my-12 p-8 bg-zinc-950 border border-zinc-900 rounded-sm text-zinc-200 antialiased">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-zinc-900 pb-5">
+        <div>
+          <span className="text-[10px] font-bold tracking-widest text-zinc-500 font-mono uppercase block mb-1">Administrative Privilege Node</span>
+          <h2 className="text-lg font-semibold tracking-tight text-white uppercase font-mono">LOGISTICS MANIFEST CONFIG</h2>
+        </div>
+        <button onClick={onBack} className="px-4 py-2 text-xs font-mono font-bold tracking-wider bg-black border border-zinc-900 text-zinc-400 rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-150">
+          MONITOR NODE
         </button>
       </div>
 
-      {msg && <p style={{ padding: '10px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px' }}>{msg}</p>}
+      {msg && <p className="p-3 mb-6 bg-zinc-900 border border-zinc-800 text-emerald-400 text-xs font-mono font-medium tracking-wide rounded-sm">{msg}</p>}
 
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-        <button onClick={() => setActiveTab('users')} style={{ padding: '10px', background: activeTab === 'users' ? '#2563eb' : '#e5e7eb', color: activeTab === 'users' ? 'white' : 'black', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Manage Users</button>
-        <button onClick={() => setActiveTab('add-fleet')} style={{ padding: '10px', background: activeTab === 'add-fleet' ? '#2563eb' : '#e5e7eb', color: activeTab === 'add-fleet' ? 'white' : 'black', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Add Fleet Asset</button>
+      <div className="flex gap-4 mb-8 border-b border-zinc-900 pb-px font-mono text-xs font-bold">
+        <button 
+          onClick={() => setActiveTab('users')} 
+          className={`pb-3 tracking-wider transition-all uppercase ${activeTab === 'users' ? 'text-emerald-500 border-b-2 border-emerald-500' : 'text-zinc-500 hover:text-zinc-300'}`}
+        >
+          PERSONNEL DIRECTORY
+        </button>
+        <button 
+          onClick={() => setActiveTab('add-fleet')} 
+          className={`pb-3 tracking-wider transition-all uppercase ${activeTab === 'add-fleet' ? 'text-emerald-500 border-b-2 border-emerald-500' : 'text-zinc-500 hover:text-zinc-300'}`}
+        >
+          PROVISION ASSET
+        </button>
       </div>
 
       {activeTab === 'users' ? (
         <div>
-          <h3>Create New System User Account</h3>
-          <form onSubmit={handleCreateUser} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '30px' }}>
-            <input type="text" placeholder="Full Name" value={newUser.full_name} onChange={e => setNewUser({...newUser, full_name: e.target.value})} required style={{ padding: '8px' }} />
-            <input type="email" placeholder="Email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} required style={{ padding: '8px' }} />
-            <input type="password" placeholder="Password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} required style={{ padding: '8px' }} />
-            <select value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})} style={{ padding: '8px' }}>
-              <option value="operator">Operator</option>
-              <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
-            </select>
-            <button type="submit" style={{ padding: '8px 12px', background: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Create User</button>
+          <h3 className="font-mono text-[10px] font-bold text-zinc-500 mb-4 tracking-widest uppercase">INITIALIZE SYSTEM OPERATIONAL CREDENTIALS</h3>
+          <form onSubmit={handleCreateUser} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 p-5 mb-8 bg-black border border-zinc-900 rounded-sm items-end font-mono text-xs">
+            <div className="space-y-1">
+              <span className="text-[9px] font-bold text-zinc-600 block uppercase">IDENTITY</span>
+              <input type="text" placeholder="Identity Name" value={newUser.full_name} onChange={e => setNewUser({...newUser, full_name: e.target.value})} required className="w-full p-2.5 bg-zinc-950 border border-zinc-800 text-white rounded-sm focus:outline-none focus:border-zinc-600 text-xs" />
+            </div>
+            <div className="space-y-1">
+              <span className="text-[9px] font-bold text-zinc-600 block uppercase">NETWORK MAIL</span>
+              <input type="email" placeholder="Network Mail Secure" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} required className="w-full p-2.5 bg-zinc-950 border border-zinc-800 text-white rounded-sm focus:outline-none focus:border-zinc-600 text-xs" />
+            </div>
+            <div className="space-y-1">
+              <span className="text-[9px] font-bold text-zinc-600 block uppercase">PASSWORD</span>
+              <input type="password" placeholder="Token Hash" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} required className="w-full p-2.5 bg-zinc-950 border border-zinc-800 text-white rounded-sm focus:outline-none focus:border-zinc-600 text-xs" />
+            </div>
+            <div className="space-y-1">
+              <span className="text-[9px] font-bold text-zinc-600 block uppercase">CLEARANCE</span>
+              <select value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})} className="w-full p-2.5 bg-zinc-950 border border-zinc-800 text-white rounded-sm focus:outline-none focus:border-zinc-600 text-xs font-mono uppercase">
+                <option value="operator">Operator</option>
+                <option value="manager">Manager</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <button type="submit" className="w-full py-2.5 bg-emerald-500 text-black font-bold text-xs rounded-sm hover:bg-emerald-400 transition-colors duration-150 h-[37px]">COMMIT USER</button>
           </form>
 
-          <h3>System Accounts Log</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ background: '#f3f4f6' }}>
-                <th style={{ padding: '10px' }}>Name</th>
-                <th style={{ padding: '10px' }}>Email</th>
-                <th style={{ padding: '10px' }}>Role</th>
-                <th style={{ padding: '10px' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(u => (
-                <tr key={u.user_id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                  <td style={{ padding: '10px' }}>{u.full_name}</td>
-                  <td style={{ padding: '10px' }}>{u.email}</td>
-                  <td style={{ padding: '10px' }}><span style={{ textTransform: 'uppercase', fontSize: '12px', fontWeight: 'bold' }}>{u.role}</span></td>
-                  <td style={{ padding: '10px' }}>
-                    <button onClick={() => handleDeleteUser(u.user_id)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>
-                  </td>
+          <h3 className="font-mono text-[10px] font-bold text-zinc-500 mb-4 tracking-widest uppercase">AUTHORIZED COHORT ARCHIVE REGISTER</h3>
+          <div className="overflow-x-auto border border-zinc-900 rounded-sm bg-black">
+            <table className="w-full text-left border-collapse font-sans">
+              <thead>
+                <tr className="bg-zinc-950 border-b border-zinc-900 font-mono text-[9px] tracking-widest text-zinc-500">
+                  <th className="p-4 font-bold">NOMENCLATURE</th>
+                  <th className="p-4 font-bold">NETWORK ALIAS</th>
+                  <th className="p-4 font-bold">CLEARANCE MODE</th>
+                  <th className="p-4 font-bold text-right">SYSTEM ACTION</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-zinc-900 text-zinc-300 text-xs">
+                {users.map(u => (
+                  <tr key={u.user_id} className="hover:bg-zinc-950 transition-colors duration-100">
+                    <td className="p-4 font-medium text-zinc-100 uppercase font-mono tracking-tight text-[13px]">{u.full_name}</td>
+                    <td className="p-4 text-zinc-400 font-mono">{u.email}</td>
+                    <td className="p-4"><span className="text-[9px] font-mono font-bold tracking-widest uppercase text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-sm border border-zinc-800">{u.role}</span></td>
+                    <td className="p-4 text-right">
+                      <button onClick={() => handleDeleteUser(u.user_id)} className="text-zinc-600 hover:text-red-400 font-mono text-[11px] uppercase transition-colors duration-100">Purge</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : (
-        <form onSubmit={handleCreateFleet} style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '400px' }}>
-          <h3>Register New Fleet Asset</h3>
+        <form onSubmit={handleCreateFleet} className="flex flex-col gap-5 max-w-md bg-black border border-zinc-900 p-6 rounded-sm">
+          <h3 className="text-xs font-bold text-white tracking-widest uppercase font-mono border-b border-zinc-900 pb-3">PROVISION UNMANNED HARDWARE PLATES</h3>
           <div>
-            <label style={{ display: 'block', marginBottom: '5px' }}>Vehicle Function Classification:</label>
-            <select value={newFleet.vehicle_type} onChange={e => setNewFleet({...newFleet, vehicle_type: e.target.value})} style={{ width: '100%', padding: '8px' }}>
-              <option value="snow cleaner">Snow Cleaner</option>
-              <option value="lawn mower">Lawn Mower</option>
-              <option value="sweeper">Sweeper</option>
+            <label className="block mb-2 text-[9px] font-mono font-bold text-zinc-500 tracking-wider">HARDWARE CLASS CONFIGURATION:</label>
+            <select value={newFleet.vehicle_type} onChange={e => setNewFleet({...newFleet, vehicle_type: e.target.value})} className="w-full p-2.5 bg-zinc-950 border border-zinc-800 text-zinc-100 rounded-sm focus:outline-none focus:border-zinc-700 text-xs font-mono uppercase">
+              <option value="snow cleaner">SNOW DISPLACEMENT COMBINE</option>
+              <option value="lawn mower">VEGETATION INTERCEPT ARRAY</option>
+              <option value="sweeper">SURFACE SCRUB MATRIX</option>
             </select>
           </div>
           <div>
-            <label style={{ display: 'block', marginBottom: '5px' }}>Initial Battery Percentage Status:</label>
-            <input type="number" min="0" max="100" value={newFleet.battery_life_percentage} onChange={e => setNewFleet({...newFleet, battery_life_percentage: parseInt(e.target.value)})} style={{ width: '100%', padding: '8px' }} />
+            <label className="block mb-2 text-[9px] font-mono font-bold text-zinc-500 tracking-wider">INITIAL POTENCY CELL RESERVOIR STATUS (%):</label>
+            <input type="number" min="0" max="100" value={newFleet.battery_life_percentage} onChange={e => setNewFleet({...newFleet, battery_life_percentage: parseInt(e.target.value)})} className="w-full p-2 bg-zinc-950 border border-zinc-800 text-zinc-100 rounded-sm focus:outline-none focus:border-zinc-700 text-xs font-mono font-bold" />
           </div>
-          <button type="submit" style={{ padding: '10px', background: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Register Asset</button>
+          <button type="submit" className="w-full mt-2 py-3 bg-emerald-500 text-black font-mono font-bold text-xs tracking-wider uppercase rounded-sm hover:bg-emerald-400 transition-colors duration-200">
+            PROVISION NEW MACHINE ASSEMBLY
+          </button>
         </form>
       )}
     </div>

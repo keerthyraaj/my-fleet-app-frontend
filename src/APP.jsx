@@ -6,20 +6,6 @@ import AdminConsole from './AdminConsole';
 
 function App() {
   const [email, setEmail] = useState('');
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-
-  useEffect(() => {
-    const handleOnlineStatus = () => setIsOnline(true);
-    const handleOfflineStatus = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnlineStatus);
-    window.addEventListener('offline', handleOfflineStatus);
-
-    return () => {
-      window.removeEventListener('online', handleOnlineStatus);
-      window.removeEventListener('offline', handleOfflineStatus);
-    };
-  }, []);
   const [password, setPassword] = useState('');
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
@@ -27,6 +13,18 @@ function App() {
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnlineStatus = () => setIsOnline(true);
+    const handleOfflineStatus = () => setIsOnline(false);
+    window.addEventListener('online', handleOnlineStatus);
+    window.addEventListener('offline', handleOfflineStatus);
+    return () => {
+      window.removeEventListener('online', handleOnlineStatus);
+      window.removeEventListener('offline', handleOfflineStatus);
+    };
+  }, []);
 
   const apiBaseUrl = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : 'https://my-fleet-app-backend.onrender.com')).replace(/\/$/, '');
 
@@ -135,89 +133,112 @@ function App() {
     const maxBarValue = Math.max(...fleetTypes.map((item) => item.count), 1);
 
     return (
-      <div style={{ maxWidth: '1100px', margin: '40px auto', padding: '24px', fontFamily: 'sans-serif' }}>
+      <div className="max-w-7xl mx-auto px-6 py-12 bg-black min-h-screen text-zinc-100 antialiased">
+        
         {!isOnline && (
-          <div style={{ padding: '12px', background: '#fef3c7', border: '1px solid #fde68a', color: '#92400e', borderRadius: '8px', marginBottom: '16px', fontWeight: 'bold', textAlign: 'center' }}>
-            ⚠️ Working Offline. Live GPS map telemetry tracking updates are temporarily paused.
+          <div className="p-3 bg-zinc-900 border-l-2 border-red-500 text-red-400 text-xs font-mono mb-8 tracking-wide">
+            CRITICAL NOTICE: OFFLINE — telemetry stream buffered locally.
           </div>
         )}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+
+        {/* Snowbotix Industrial Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 border-b border-zinc-900 pb-8">
           <div>
-            <p style={{ margin: 0, color: '#4b5563' }}>Fleet operations dashboard</p>
-            <h1 style={{ margin: '6px 0 0', color: '#111827' }}>Welcome, {loggedInUser?.fullName}</h1>
+            <span className="text-[10px] font-bold tracking-[0.2em] text-emerald-500 uppercase block mb-1">Fleet Management Module</span>
+            <h1 className="text-xl font-semibold tracking-tight text-white uppercase">
+              Control Center <span className="text-zinc-600 font-light font-sans">/ {loggedInUser?.fullName}</span>
+            </h1>
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div className="flex flex-wrap gap-2 text-xs font-mono">
             {loggedInUser?.role === 'admin' && (
               <button
                 onClick={() => setActiveView('admin-console')}
-                style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#d97706', color: 'white', fontWeight: 'bold' }}
+                className="px-4 py-2 bg-emerald-500 text-black font-semibold rounded-sm hover:bg-emerald-400 transition-colors duration-200"
               >
-                🛠️ Admin Panel
+                ADMIN NODE
               </button>
             )}
-            <button onClick={handleOpenFleetMap} style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#0f766e', color: 'white' }}>
-              🗺️ Map
+            <button 
+              onClick={handleOpenFleetMap} 
+              className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-200"
+            >
+              TELEMETRY MAP
             </button>
-            <button onClick={handleOpenFleetScheduleDemo} style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#7c3aed', color: 'white' }}>
-              🗓️ Schedule demo
+            <button 
+              onClick={handleOpenFleetScheduleDemo} 
+              className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-200"
+            >
+              SCHEDULER
             </button>
-            <button onClick={handleLogout} style={{ padding: '10px 16px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#111827', color: 'white' }}>
-              Logout
+            <button onClick={handleLogout} className="px-4 py-2 text-zinc-600 hover:text-zinc-400 transition-colors duration-200">
+              DISCONNECT
             </button>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-          <div style={{ background: 'linear-gradient(135deg, #2563eb, #4f46e5)', color: 'white', padding: '18px', borderRadius: '12px' }}>
-            <p style={{ margin: 0, opacity: 0.9 }}>Assigned fleets</p>
-            <h2 style={{ margin: '8px 0 0', fontSize: '28px' }}>{stats.fleetCount || 0}</h2>
+        {/* Flat Metric Cells */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+          <div className="border border-zinc-900 bg-zinc-950 p-6 rounded-sm">
+            <span className="text-[9px] font-bold tracking-widest text-zinc-500 uppercase block font-mono">TRACKED HARDWARE UNITS</span>
+            <div className="mt-3 text-4xl font-light text-white tracking-tight">{stats.fleetCount || 0}</div>
           </div>
-          <div style={{ background: 'linear-gradient(135deg, #0f766e, #14b8a6)', color: 'white', padding: '18px', borderRadius: '12px' }}>
-            <p style={{ margin: 0, opacity: 0.9 }}>Distance covered</p>
-            <h2 style={{ margin: '8px 0 0', fontSize: '28px' }}>{Number(stats.totalDistanceKm || 0).toFixed(2)} km</h2>
+          <div className="border border-zinc-900 bg-zinc-950 p-6 rounded-sm">
+            <span className="text-[9px] font-bold tracking-widest text-zinc-500 uppercase block font-mono">TOTAL DISPLACEMENT DISPATCHED</span>
+            <div className="mt-3 text-4xl font-light text-white tracking-tight">
+              {Number(stats.totalDistanceKm || 0).toFixed(2)} <span className="text-xs text-zinc-600 font-normal tracking-normal">KM</span>
+            </div>
           </div>
-          <div style={{ background: 'linear-gradient(135deg, #b45309, #f59e0b)', color: 'white', padding: '18px', borderRadius: '12px' }}>
-            <p style={{ margin: 0, opacity: 0.9 }}>Average battery</p>
-            <h2 style={{ margin: '8px 0 0', fontSize: '28px' }}>{Number(stats.averageBattery || 0).toFixed(0)}%</h2>
+          <div className="border border-zinc-900 bg-zinc-950 p-6 rounded-sm">
+            <span className="text-[9px] font-bold tracking-widest text-zinc-500 uppercase block font-mono">SYSTEM BATT MEAN POTENTIAL</span>
+            <div className="mt-3 text-4xl font-light text-emerald-500 tracking-tight">
+              {Number(stats.averageBattery || 0).toFixed(0)}<span className="text-sm text-emerald-700 font-normal tracking-normal">%</span>
+            </div>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 0.9fr', gap: '20px' }}>
-          <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '18px' }}>
-            <h3 style={{ marginTop: 0 }}>Fleet type distribution</h3>
+        {/* Industrial Section Splits */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 border border-zinc-900 bg-zinc-950 rounded-sm p-6">
+            <h3 className="text-xs font-semibold tracking-wider text-zinc-400 uppercase mb-6 font-mono">ASSET SPECIATION MATRICES</h3>
             {fleetTypes.length > 0 ? (
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', height: '220px', marginTop: '16px' }}>
+              <div className="flex items-end gap-6 h-56 pt-4">
                 {fleetTypes.map((item) => (
-                  <div key={item.type} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ width: '100%', height: '180px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-                      <div style={{ width: '100%', maxWidth: '70px', height: `${Math.max((item.count / maxBarValue) * 100, 8)}%`, background: '#2563eb', borderRadius: '8px 8px 0 0' }} />
+                  <div key={item.type} className="flex-1 flex flex-col items-center">
+                    <div className="w-full h-40 flex items-end justify-center">
+                      <div 
+                        style={{ height: `${Math.max((item.count / maxBarValue) * 100, 4)}%` }}
+                        className="w-full max-w-[28px] bg-zinc-800 hover:bg-emerald-500 transition-colors duration-150 rounded-t-sm"
+                      />
                     </div>
-                    <p style={{ margin: '8px 0 0', fontSize: '13px', textAlign: 'center', color: '#374151' }}>{item.type}</p>
-                    <p style={{ margin: '2px 0 0', fontWeight: 700 }}>{item.count}</p>
+                    <p className="mt-3 text-[9px] font-mono font-medium tracking-wide uppercase text-zinc-500 truncate w-full text-center">{item.type}</p>
+                    <p className="mt-1 font-mono font-semibold text-white text-xs">{item.count}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p style={{ color: '#6b7280' }}>No fleet data is available yet. Add data to the database to see charts.</p>
+              <p className="text-zinc-700 py-16 text-center text-xs font-mono">NO ACTIVE ALLOCATIONS RECORDED.</p>
             )}
           </div>
 
-          <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '18px' }}>
-            <h3 style={{ marginTop: 0 }}>Operational status</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
+          <div className="border border-zinc-900 bg-zinc-950 rounded-sm p-6">
+            <h3 className="text-xs font-semibold tracking-wider text-zinc-400 uppercase mb-6 font-mono">HARDWARE OPERATION LIFECYCLE</h3>
+            <div className="flex flex-col gap-5">
               {[
-                { label: 'Idle', value: stats.idleFleets || 0, color: '#6b7280' },
-                { label: 'Active', value: stats.activeFleets || 0, color: '#10b981' },
-                { label: 'Charging', value: stats.chargingFleets || 0, color: '#f59e0b' },
-                { label: 'Maintenance', value: stats.maintenanceFleets || 0, color: '#ef4444' }
+                { label: 'STANDBY (IDLE)', value: stats.idleFleets || 0, color: 'bg-zinc-800' },
+                { label: 'DEPLOYED (ACTIVE)', value: stats.activeFleets || 0, color: 'bg-emerald-500' },
+                { label: 'RECHARGING CELLS', value: stats.chargingFleets || 0, color: 'bg-zinc-600' },
+                { label: 'MAINTENANCE DECOUPLING', value: stats.maintenanceFleets || 0, color: 'bg-zinc-700' }
               ].map((item) => (
-                <div key={item.label}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <div key={item.label} className="text-xs">
+                  <div className="flex justify-between mb-1 text-[10px] font-mono font-semibold text-zinc-500">
                     <span>{item.label}</span>
-                    <strong>{item.value}</strong>
+                    <span className="text-white font-bold">{item.value}</span>
                   </div>
-                  <div style={{ height: '8px', background: '#e5e7eb', borderRadius: '999px', overflow: 'hidden' }}>
-                    <div style={{ width: `${Math.min((item.value / Math.max(stats.fleetCount || 1, 1)) * 100, 100)}%`, height: '100%', background: item.color, borderRadius: '999px' }} />
+                  <div className="h-1 bg-zinc-900 rounded-sm overflow-hidden">
+                    <div 
+                      className={`h-full ${item.color}`}
+                      style={{ width: `${Math.min((item.value / Math.max(stats.fleetCount || 1, 1)) * 100, 100)}%` }}
+                    />
                   </div>
                 </div>
               ))}
@@ -230,14 +251,14 @@ function App() {
 
   if (loggedInUser && activeView === 'map') {
     return (
-      <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      <div className="p-6 bg-black min-h-screen text-zinc-100 antialiased font-sans">
+        <div className="flex justify-between items-center mb-6 border-b border-zinc-900 pb-4">
           <div>
-            <h2 style={{ margin: 0 }}>Fleet map</h2>
-            <p style={{ margin: '4px 0 0', color: '#6b7280' }}>Hover over a dot to see fleet details.</p>
+            <h2 className="text-lg font-semibold tracking-tight text-white font-mono uppercase">REALTIME TELEMETRY STREAM</h2>
+            <p className="text-xs text-zinc-500 mt-0.5">Asset coordinate verification vectors active.</p>
           </div>
-          <button onClick={() => setActiveView('dashboard')} style={{ padding: '10px 14px', cursor: 'pointer', border: 'none', borderRadius: '6px', background: '#111827', color: 'white' }}>
-            Back to dashboard
+          <button onClick={() => setActiveView('dashboard')} className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium text-xs font-mono tracking-wide rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-150">
+            TERMINAL MONITOR
           </button>
         </div>
         <FleetMap fleets={fleetMapData} />
@@ -269,37 +290,45 @@ function App() {
   }
 
   return (
-    <div style={{ maxWidth: '400px', margin: '100px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px', fontFamily: 'sans-serif' }}>
-      <h2>Fleet Management Login</h2>
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-
-      <form onSubmit={handleLogin}>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>Email Address:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-          />
+    <div className="flex items-center justify-center min-h-screen bg-black text-zinc-200 antialiased p-4">
+      <div className="w-full max-w-[420px] bg-zinc-950 border border-zinc-900 p-8 rounded-sm shadow-2xl">
+        <div className="mb-8 border-b border-zinc-900 pb-4">
+          <span className="text-[10px] font-bold tracking-[0.2em] text-emerald-500 uppercase font-mono block mb-1">Command Interface</span>
+          <h2 className="text-xl font-semibold tracking-tight text-white uppercase font-mono">SYSTEM ACCESS AUTH</h2>
         </div>
+        
+        {errorMessage && <p className="p-3 mb-4 bg-red-950/20 border border-red-950 text-red-400 text-xs font-mono font-medium tracking-wide">{errorMessage}</p>}
 
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-          />
-        </div>
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div>
+            <label className="block text-[10px] font-bold tracking-wider text-zinc-500 uppercase font-mono mb-2">NETWORK GATEWAY ALIAS (EMAIL)</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full p-3 bg-black border border-zinc-800 text-white text-sm rounded-sm focus:outline-none focus:border-zinc-700 transition-colors font-mono"
+              placeholder="operator@network.com"
+            />
+          </div>
 
-        <button type="submit" style={{ width: '100%', padding: '10px', background: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-          {isLoading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
+          <div>
+            <label className="block text-[10px] font-bold tracking-wider text-zinc-500 uppercase font-mono mb-2">CRYPTOGRAPHIC PASSWORD TOKEN</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full p-3 bg-black border border-zinc-800 text-white text-sm rounded-sm focus:outline-none focus:border-zinc-700 transition-colors font-mono"
+              placeholder="••••••••••••"
+            />
+          </div>
+
+          <button type="submit" className="w-full py-3 bg-emerald-500 text-black font-mono font-bold text-xs tracking-widest uppercase rounded-sm hover:bg-emerald-400 transition-colors duration-200 mt-2">
+            {isLoading ? 'ESTABLISHING LINK...' : 'ESTABLISH LINK'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
