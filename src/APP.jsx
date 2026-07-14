@@ -4,6 +4,31 @@ import FleetMap from './FleetMap';
 import FleetScheduleDemo from './FleetScheduleDemo';
 import AdminConsole from './AdminConsole';
 
+const VIEW_PATHS = {
+  login: '/login',
+  dashboard: '/dashboard',
+  map: '/map',
+  'schedule-demo': '/schedule-demo',
+  'admin-console': '/admin-console'
+};
+
+function getViewFromPath(pathname) {
+  switch (pathname) {
+    case '/dashboard':
+      return 'dashboard';
+    case '/map':
+      return 'map';
+    case '/schedule-demo':
+      return 'schedule-demo';
+    case '/admin-console':
+      return 'admin-console';
+    case '/':
+    case '/login':
+    default:
+      return 'login';
+  }
+}
+
 function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,7 +37,9 @@ function App() {
   const [fleetMapData, setFleetMapData] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [activeView, setActiveView] = useState('dashboard');
+  const [activeView, setActiveView] = useState(() =>
+    getViewFromPath(window.location.pathname)
+  );
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
@@ -26,7 +53,47 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const handlePopState = () => {
+      const nextView = getViewFromPath(window.location.pathname);
+
+      setActiveView(nextView);
+
+      if (nextView === 'login') {
+        setLoggedInUser(null);
+        setDashboardData(null);
+        setFleetMapData([]);
+        setErrorMessage('');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (window.location.pathname === '/') {
+      window.history.replaceState({ view: 'login' }, '', VIEW_PATHS.login);
+      setActiveView('login');
+    }
+  }, []);
+
   const apiBaseUrl = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : 'https://my-fleet-app-backend.onrender.com')).replace(/\/$/, '');
+
+  const navigateTo = (view, { replace = false } = {}) => {
+    const path = VIEW_PATHS[view] || VIEW_PATHS.login;
+
+    if (replace) {
+      window.history.replaceState({ view }, '', path);
+    } else {
+      window.history.pushState({ view }, '', path);
+    }
+
+    setActiveView(view);
+  };
 
   const fetchDashboardData = async () => {
     setIsLoading(true);
@@ -85,7 +152,7 @@ function App() {
           fullName: data.fullName,
           role: data.role // <-- Tracks structural roles globally inside your React UI
       });
-        setActiveView('dashboard');
+        navigateTo('dashboard');
         await fetchDashboardData();
       } else {
         setErrorMessage(data.message);
@@ -108,20 +175,21 @@ function App() {
     setLoggedInUser(null);
     setDashboardData(null);
     setFleetMapData([]);
-    setActiveView('dashboard');
     setEmail('');
     setPassword('');
+
+    navigateTo('login', { replace: true });
   };
 
   const handleOpenFleetMap = async () => {
-    setActiveView('map');
+    navigateTo('map');
     if (fleetMapData.length === 0) {
       await fetchFleetMapData();
     }
   };
 
   const handleOpenFleetScheduleDemo = async () => {
-    setActiveView('schedule-demo');
+    navigateTo('schedule-demo');
     if (fleetMapData.length === 0) {
       await fetchFleetMapData();
     }
@@ -152,7 +220,7 @@ function App() {
           <div className="flex flex-wrap gap-2 text-xs">
             {loggedInUser?.role === 'admin' && (
               <button
-                onClick={() => setActiveView('admin-console')}
+                onClick={() => navigateTo('admin-console')}
                 className="px-4 py-2 bg-emerald-500 text-black font-semibold rounded-sm hover:bg-emerald-400 transition-colors duration-150"
               >
                 🛠| Admin Panel
@@ -257,7 +325,7 @@ function App() {
             <h2 className="text-lg font-semibold tracking-tight text-white uppercase font-mono">Fleet map</h2>
             <p className="text-xs text-zinc-500 mt-0.5">Hover over a dot to see fleet details.</p>
           </div>
-          <button onClick={() => setActiveView('dashboard')} className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium text-xs font-mono tracking-wide rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-150">
+          <button onClick={() => navigateTo('dashboard')} className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium text-xs font-mono tracking-wide rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-150">
             Back to dashboard
           </button>
         </div>
@@ -271,7 +339,7 @@ function App() {
       <FleetScheduleDemo
         fleets={fleetMapData}
         apiBaseUrl={apiBaseUrl}
-        onBack={() => setActiveView('dashboard')}
+        onBack={() => navigateTo('dashboard')}
       />
     );
   }
@@ -280,7 +348,7 @@ function App() {
   return (
     <AdminConsole 
       apiBaseUrl={apiBaseUrl} 
-      onBack={() => setActiveView('dashboard')} 
+      onBack={() => navigateTo('dashboard')} 
     />
    );
   }
