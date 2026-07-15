@@ -65,19 +65,20 @@ export default function AdminConsole({ apiBaseUrl, onBack }) {
   };
 
   return (
-    <div className="max-w-5xl mx-auto my-12 p-8 bg-zinc-950 border border-zinc-900 rounded-sm text-zinc-200 antialiased">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-zinc-900 pb-5">
+    <div className="min-h-screen w-full bg-black px-4 py-6 text-zinc-200 antialiased sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-900 pb-5">
         <div>
           <h2 className="text-lg font-semibold tracking-tight text-white">🛠️ System Administration</h2>
         </div>
-        <button onClick={onBack} className="px-4 py-2 text-xs font-bold tracking-wider bg-black border border-zinc-900 text-zinc-400 rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-150">
+        <button onClick={onBack} className="px-4 py-2 text-xs font-bold tracking-wider bg-zinc-900 border border-zinc-800 text-zinc-400 rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-150">
           Back to Dashboard
         </button>
       </div>
 
-      {msg && <p className="p-3 mb-6 bg-zinc-900 border border-zinc-800 text-emerald-400 text-xs rounded-sm">{msg}</p>}
+      {msg && <p className="p-3 bg-zinc-900 border border-zinc-800 text-emerald-400 text-xs rounded-sm">{msg}</p>}
 
-      <div className="flex gap-4 mb-8 border-b border-zinc-900 pb-px text-xs font-bold">
+      <div className="flex gap-4 border-b border-zinc-900 pb-px text-xs font-bold">
         <button 
           onClick={() => setActiveTab('users')} 
           className={`pb-3 tracking-wider transition-all uppercase ${activeTab === 'users' ? 'text-emerald-500 border-b-2 border-emerald-500' : 'text-zinc-500 hover:text-zinc-300'}`}
@@ -99,7 +100,7 @@ export default function AdminConsole({ apiBaseUrl, onBack }) {
             <input type="text" placeholder="Full Name" value={newUser.full_name} onChange={e => setNewUser({...newUser, full_name: e.target.value})} required className="w-full p-2.5 bg-zinc-950 border border-zinc-800 text-white rounded-sm focus:outline-none focus:border-zinc-600 text-xs" />
             <input type="email" placeholder="Email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} required className="w-full p-2.5 bg-zinc-950 border border-zinc-800 text-white rounded-sm focus:outline-none focus:border-zinc-600 text-xs" />
             <input type="password" placeholder="Password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} required className="w-full p-2.5 bg-zinc-950 border border-zinc-800 text-white rounded-sm focus:outline-none focus:border-zinc-600 text-xs" />
-            <select value={newUser.role} className="w-full p-2.5 bg-zinc-950 border border-zinc-800 text-white rounded-sm focus:outline-none focus:border-zinc-600 text-xs uppercase">
+            <select value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})} className="w-full p-2.5 bg-zinc-950 border border-zinc-800 text-white rounded-sm focus:outline-none focus:border-zinc-600 text-xs uppercase">
               <option value="operator">Operator</option>
               <option value="manager">Manager</option>
               <option value="admin">Admin</option>
@@ -153,6 +154,7 @@ export default function AdminConsole({ apiBaseUrl, onBack }) {
           </button>
         </form>
       )}
+      </div>
     </div>
   );
 }

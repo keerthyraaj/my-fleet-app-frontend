@@ -259,7 +259,8 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, onBack }) {
   const selectedFleet = fleets.find((fleet) => fleet.fleet_id === selectedFleetId) || null;
 
   return (
-    <div className="max-w-5xl mx-auto my-12 p-8 bg-zinc-950 border border-zinc-900 rounded-sm text-zinc-200 antialiased">
+    <div className="min-h-screen w-full bg-black px-4 py-6 text-zinc-200 antialiased sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
       {/* Module Title Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-zinc-900 pb-5">
         <div>
@@ -317,13 +318,14 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, onBack }) {
               >
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                 />
                 <RouteDemoLayer schedule={schedule} selectedFleet={selectedFleet} />
               </MapContainer>
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

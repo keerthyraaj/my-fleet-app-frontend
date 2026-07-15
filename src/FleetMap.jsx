@@ -70,7 +70,8 @@ function FleetMap({ fleets }) {
       center={[30.2672, -97.7431]}
       zoom={13}
       style={{
-        height: "600px",
+        height: "min(75vh, 760px)",
+        minHeight: "560px",
         width: "100%",
       }}
     >
