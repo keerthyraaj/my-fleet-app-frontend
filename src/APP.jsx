@@ -37,8 +37,9 @@ function App() {
   const [fleetMapData, setFleetMapData] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [activeView, setActiveView] = useState(() =>
-    getViewFromPath(window.location.pathname)
+  getViewFromPath(window.location.pathname)
   );
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
@@ -75,13 +76,142 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (window.location.pathname === '/') {
-      window.history.replaceState({ view: 'login' }, '', VIEW_PATHS.login);
-      setActiveView('login');
-    }
+
+  restoreSession();
+
   }, []);
 
   const apiBaseUrl = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : 'https://my-fleet-app-backend.onrender.com')).replace(/\/$/, '');
+  const restoreSession = async () => {
+  try {
+
+    const response = await fetch(
+      `${apiBaseUrl}/api/auth/me`,
+      {
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      setCheckingSession(false);
+      return;
+    }
+
+    const user = await response.json();
+
+    setLoggedInUser({
+      fullName: user.fullName,
+      role: user.role,
+      email: user.email,
+    });
+
+    await fetchDashboardData();
+
+    if (window.location.pathname === "/map") {
+
+      setActiveView("map");
+
+      await fetchFleetMapData();
+
+    } else if (window.location.pathname === "/schedule-demo") {
+
+      setActiveView("schedule-demo");
+
+      await fetchFleetMapData();
+
+    } else if (window.location.pathname === "/admin-console") {
+
+      setActiveView("admin-console");
+
+    } else {
+
+      setActiveView("dashboard");
+
+    }
+
+  } catch (err) {
+
+    console.log(err);
+
+  } finally {
+
+    setCheckingSession(false);
+
+  }
+};
+  
+  // ======================================================
+// RESTORE SESSION AFTER PAGE REFRESH
+// ======================================================
+useEffect(() => {
+
+  const restoreSession = async () => {
+
+    try {
+
+      const response = await fetch(
+        `${apiBaseUrl}/api/auth/me`,
+        {
+          credentials: "include"
+        }
+      );
+
+      if (!response.ok) {
+        return;
+      }
+
+      const user = await response.json();
+
+      setLoggedInUser({
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role
+      });
+
+      await fetchDashboardData();
+
+      if (window.location.pathname === "/map") {
+
+        setActiveView("map");
+
+        await fetchFleetMapData();
+
+      }
+
+      else if (window.location.pathname === "/schedule-demo") {
+
+        setActiveView("schedule-demo");
+
+        await fetchFleetMapData();
+
+      }
+
+      else if (window.location.pathname === "/admin-console") {
+
+        setActiveView("admin-console");
+
+      }
+
+      else {
+
+        setActiveView("dashboard");
+
+      }
+
+    }
+
+    catch (err) {
+
+      console.log(err);
+
+    }
+
+  };
+
+  restoreSession();
+
+  }, []);
+
 
   const navigateTo = (view, { replace = false } = {}) => {
     const path = VIEW_PATHS[view] || VIEW_PATHS.login;
