@@ -208,6 +208,22 @@ function RouteDemoLayer({ schedule, selectedFleet }) {
   );
 }
 
+function MapAutoResize({ trigger }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
+      map.invalidateSize();
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [map, trigger]);
+
+  return null;
+}
+
 function FleetScheduleDemo({ fleets, apiBaseUrl, onBack }) {
   const [selectedFleetId, setSelectedFleetId] = useState(null);
   const [schedule, setSchedule] = useState(null);
@@ -320,6 +336,7 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, onBack }) {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                 />
+                <MapAutoResize trigger={schedule.schedule_id} />
                 <RouteDemoLayer schedule={schedule} selectedFleet={selectedFleet} />
               </MapContainer>
             </div>
