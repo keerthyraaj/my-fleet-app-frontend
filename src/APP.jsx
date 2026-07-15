@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import FleetMap from './FleetMap';
 import FleetScheduleDemo from './FleetScheduleDemo';
 import AdminConsole from './AdminConsole';
+import DashboardPanel from './DashboardPanel';
 
 const VIEW_PATHS = {
   login: '/login',
@@ -38,6 +39,7 @@ function App() {
   const [password, setPassword] = useState('');
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
+  const [insightsData, setInsightsData] = useState(null);
   const [fleetMapData, setFleetMapData] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -95,6 +97,23 @@ function App() {
     }
   }
 
+  async function fetchDashboardInsights() {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/dashboard/insights`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setInsightsData(data);
+      } else {
+        setInsightsData(null);
+      }
+    } catch (error) {
+      setInsightsData(null);
+    }
+  }
+
   async function restoreSession() {
     const nextView = getViewFromPath(window.location.pathname);
 
@@ -111,6 +130,7 @@ function App() {
       if (!response.ok) {
         setLoggedInUser(null);
         setDashboardData(null);
+        setInsightsData(null);
         setFleetMapData([]);
         setErrorMessage('');
         navigateTo('login', { replace: true });
@@ -127,7 +147,7 @@ function App() {
       });
 
       setActiveView(resolvedView);
-      await fetchDashboardData();
+      await Promise.all([fetchDashboardData(), fetchDashboardInsights()]);
 
       if (resolvedView === 'map' || resolvedView === 'schedule-demo') {
         await fetchFleetMapData();
@@ -135,6 +155,7 @@ function App() {
     } catch (error) {
       setLoggedInUser(null);
       setDashboardData(null);
+      setInsightsData(null);
       setFleetMapData([]);
       setErrorMessage('');
     } finally {
@@ -149,6 +170,7 @@ function App() {
       setActiveView('login');
       setLoggedInUser(null);
       setDashboardData(null);
+      setInsightsData(null);
       setFleetMapData([]);
       setErrorMessage('');
       return;
@@ -230,7 +252,7 @@ function App() {
       });
 
       navigateTo('dashboard', { replace: true });
-      await fetchDashboardData();
+      await Promise.all([fetchDashboardData(), fetchDashboardInsights()]);
     } catch (error) {
       setErrorMessage('Could not connect to the server.');
     }
@@ -248,6 +270,7 @@ function App() {
 
     setLoggedInUser(null);
     setDashboardData(null);
+    setInsightsData(null);
     setFleetMapData([]);
     setEmail('');
     setPassword('');
@@ -271,120 +294,17 @@ function App() {
   }
 
   function renderDashboard() {
-    const stats = dashboardData?.stats || {};
-    const fleetTypes = dashboardData?.fleetTypes || [];
-    const maxBarValue = Math.max(...fleetTypes.map((item) => item.count), 1);
-
     return (
-      <div className="min-h-screen w-full bg-black text-zinc-100 antialiased">
-        <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
-          {!isOnline && (
-            <div className="mb-6 border border-zinc-900 bg-zinc-950 px-4 py-3 text-[11px] tracking-wide text-zinc-400">
-              Working offline. Live GPS map telemetry updates are temporarily paused.
-            </div>
-          )}
-
-          <div className="mb-8 flex flex-col gap-6 border-b border-zinc-900 pb-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="mb-1 block text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">Fleet operations dashboard</p>
-              <h1 className="text-2xl font-semibold tracking-tight text-white">Welcome, {loggedInUser?.fullName}</h1>
-            </div>
-            <div className="flex flex-wrap gap-2 text-xs">
-              {loggedInUser?.role === 'admin' && (
-                <button
-                  onClick={() => navigateTo('admin-console')}
-                  className="rounded-sm border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-black transition-colors duration-150 hover:bg-emerald-400"
-                >
-                  Admin Panel
-                </button>
-              )}
-              <button
-                onClick={handleOpenFleetMap}
-                className="rounded-sm border border-zinc-800 bg-zinc-900 px-4 py-2 font-medium text-zinc-300 transition-colors duration-150 hover:border-zinc-700 hover:text-white"
-              >
-                Map
-              </button>
-              <button
-                onClick={handleOpenFleetScheduleDemo}
-                className="rounded-sm border border-zinc-800 bg-zinc-900 px-4 py-2 font-medium text-zinc-300 transition-colors duration-150 hover:border-zinc-700 hover:text-white"
-              >
-                Schedule Demo
-              </button>
-              <button onClick={handleLogout} className="rounded-sm px-4 py-2 text-zinc-500 transition-colors duration-150 hover:text-zinc-300">
-                Logout
-              </button>
-            </div>
-          </div>
-
-          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3 lg:gap-6">
-            <div className="rounded-sm border border-zinc-900 bg-zinc-950 p-6">
-              <span className="block text-[10px] font-medium uppercase tracking-[0.3em] text-zinc-500">Assigned fleets</span>
-              <div className="mt-3 text-4xl font-light tracking-tight text-white">{stats.fleetCount || 0}</div>
-            </div>
-            <div className="rounded-sm border border-zinc-900 bg-zinc-950 p-6">
-              <span className="block text-[10px] font-medium uppercase tracking-[0.3em] text-zinc-500">Distance covered</span>
-              <div className="mt-3 text-4xl font-light tracking-tight text-white">
-                {Number(stats.totalDistanceKm || 0).toFixed(2)} <span className="text-xs font-normal tracking-normal text-zinc-500">km</span>
-              </div>
-            </div>
-            <div className="rounded-sm border border-zinc-900 bg-zinc-950 p-6">
-              <span className="block text-[10px] font-medium uppercase tracking-[0.3em] text-zinc-500">Average battery</span>
-              <div className="mt-3 text-4xl font-light tracking-tight text-white">
-                {Number(stats.averageBattery || 0).toFixed(0)}<span className="text-sm font-normal tracking-normal text-zinc-500">%</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-3">
-            <div className="rounded-sm border border-zinc-900 bg-zinc-950 p-6 lg:col-span-2">
-              <h3 className="mb-6 text-xs font-semibold uppercase tracking-wider text-zinc-400">Fleet type distribution</h3>
-              {fleetTypes.length > 0 ? (
-                <div className="flex h-56 items-end gap-6 pt-4">
-                  {fleetTypes.map((item) => (
-                    <div key={item.type} className="flex flex-1 flex-col items-center">
-                      <div className="flex h-40 w-full items-end justify-center">
-                        <div
-                          style={{ height: `${Math.max((item.count / maxBarValue) * 100, 4)}%` }}
-                          className="w-full max-w-[28px] rounded-t-sm bg-zinc-800 transition-colors duration-150 hover:bg-emerald-500"
-                        />
-                      </div>
-                      <p className="mt-3 w-full truncate text-center text-[10px] uppercase tracking-wide text-zinc-500">{item.type}</p>
-                      <p className="mt-1 text-xs font-semibold text-white">{item.count}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="py-16 text-center text-xs font-mono text-zinc-600">No fleet data is available yet. Add data to the database to see charts.</p>
-              )}
-            </div>
-
-            <div className="rounded-sm border border-zinc-900 bg-zinc-950 p-6">
-              <h3 className="mb-6 text-xs font-semibold uppercase tracking-wider text-zinc-400">Operational status</h3>
-              <div className="flex flex-col gap-5">
-                {[
-                  { label: 'Idle', value: stats.idleFleets || 0, color: 'bg-zinc-800' },
-                  { label: 'Active', value: stats.activeFleets || 0, color: 'bg-emerald-500' },
-                  { label: 'Charging', value: stats.chargingFleets || 0, color: 'bg-zinc-600' },
-                  { label: 'Maintenance', value: stats.maintenanceFleets || 0, color: 'bg-zinc-700' }
-                ].map((item) => (
-                  <div key={item.label} className="text-xs">
-                    <div className="mb-1 flex justify-between text-[10px] font-semibold text-zinc-500">
-                      <span>{item.label}</span>
-                      <span className="font-bold text-white">{item.value}</span>
-                    </div>
-                    <div className="h-1 overflow-hidden rounded-sm bg-zinc-900">
-                      <div
-                        className={`h-full ${item.color}`}
-                        style={{ width: `${Math.min((item.value / Math.max(stats.fleetCount || 1, 1)) * 100, 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <DashboardPanel
+        loggedInUser={loggedInUser}
+        isOnline={isOnline}
+        dashboardData={dashboardData}
+        insightsData={insightsData}
+        onOpenFleetMap={handleOpenFleetMap}
+        onOpenFleetScheduleDemo={handleOpenFleetScheduleDemo}
+        onOpenAdmin={() => navigateTo('admin-console')}
+        onLogout={handleLogout}
+      />
     );
   }
 
