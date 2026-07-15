@@ -142,6 +142,32 @@ function App() {
     }
   }
 
+  async function syncRouteFromLocation() {
+    const nextView = getViewFromPath(window.location.pathname);
+
+    if (!PROTECTED_VIEWS.has(nextView)) {
+      setActiveView('login');
+      setLoggedInUser(null);
+      setDashboardData(null);
+      setFleetMapData([]);
+      setErrorMessage('');
+      return;
+    }
+
+    if (!loggedInUser) {
+      await restoreSession();
+      return;
+    }
+
+    setActiveView(nextView);
+
+    if (nextView === 'map' || nextView === 'schedule-demo') {
+      if (fleetMapData.length === 0) {
+        await fetchFleetMapData();
+      }
+    }
+  }
+
   useEffect(() => {
     const handleOnlineStatus = () => setIsOnline(true);
     const handleOfflineStatus = () => setIsOnline(false);
@@ -157,23 +183,21 @@ function App() {
 
   useEffect(() => {
     const handlePopState = () => {
-      const nextView = getViewFromPath(window.location.pathname);
-      setActiveView(nextView);
+      void syncRouteFromLocation();
+    };
 
-      if (nextView === 'login') {
-        setLoggedInUser(null);
-        setDashboardData(null);
-        setFleetMapData([]);
-        setErrorMessage('');
-      }
+    const handlePageShow = () => {
+      void syncRouteFromLocation();
     };
 
     window.addEventListener('popstate', handlePopState);
+    window.addEventListener('pageshow', handlePageShow);
 
     return () => {
       window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('pageshow', handlePageShow);
     };
-  }, []);
+  }, [fleetMapData.length, loggedInUser]);
 
   useEffect(() => {
     void restoreSession();
