@@ -12,6 +12,8 @@ const VIEW_PATHS = {
   'admin-console': '/admin-console'
 };
 
+const PROTECTED_VIEWS = new Set(['dashboard', 'map', 'schedule-demo', 'admin-console']);
+
 function getViewFromPath(pathname) {
   switch (pathname) {
     case '/dashboard':
@@ -94,6 +96,13 @@ function App() {
   }
 
   async function restoreSession() {
+    const nextView = getViewFromPath(window.location.pathname);
+
+    if (!PROTECTED_VIEWS.has(nextView)) {
+      setCheckingSession(false);
+      return;
+    }
+
     try {
       const response = await fetch(`${apiBaseUrl}/api/auth/me`, {
         credentials: 'include'
@@ -109,8 +118,7 @@ function App() {
       }
 
       const user = await response.json();
-      const nextView = getViewFromPath(window.location.pathname);
-      const resolvedView = nextView === 'login' ? 'dashboard' : nextView;
+  const resolvedView = nextView;
 
       setLoggedInUser({
         fullName: user.fullName,
