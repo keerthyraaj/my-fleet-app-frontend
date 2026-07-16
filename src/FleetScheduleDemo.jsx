@@ -228,6 +228,8 @@ function MapAutoResize({ trigger }) {
 
 function FleetScheduleDemo({ fleets, apiBaseUrl, menuActions }) {
   const [selectedFleetId, setSelectedFleetId] = useState(null);
+  const [fleetQuery, setFleetQuery] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [schedule, setSchedule] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -241,6 +243,19 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, menuActions }) {
       setSelectedFleetId(fleets[0].fleet_id);
     }
   }, [fleets, selectedFleetId]);
+
+  const selectedFleet = fleets.find((fleet) => fleet.fleet_id === selectedFleetId) || null;
+
+  useEffect(() => {
+    if (selectedFleet) {
+      setFleetQuery(`${selectedFleet.vehicle_type} (${selectedFleet.fleet_id.slice(0, 8)})`);
+    }
+  }, [selectedFleet]);
+
+  const filteredFleets = fleets.filter((fleet) => {
+    const searchableText = `${fleet.vehicle_type} ${fleet.fleet_id}`.toLowerCase();
+    return searchableText.includes(fleetQuery.toLowerCase().trim());
+  });
 
   useEffect(() => {
     if (!selectedFleetId || !apiBaseUrl) {
@@ -274,8 +289,6 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, menuActions }) {
     loadSchedule();
   }, [apiBaseUrl, selectedFleetId]);
 
-  const selectedFleet = fleets.find((fleet) => fleet.fleet_id === selectedFleetId) || null;
-
   return (
     <div className="min-h-screen w-full bg-black text-zinc-200 antialiased">
       <AppMenuBar
@@ -286,20 +299,58 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, menuActions }) {
       <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
       
       <div className="space-y-6">
-        {/* Fleet Hardware Selector Layout */}
-        <div>
-          <label className="block mb-2 text-[10px] font-bold tracking-wider text-zinc-500 uppercase font-mono">Select Fleet Unit for Simulation Route:</label>
-          <div className="flex flex-wrap gap-2">
-            {fleets.map((fleet) => (
-              <button
-                key={fleet.fleet_id}
-                onClick={() => setSelectedFleetId(fleet.fleet_id)}
-                className={`px-4 py-2 border font-mono text-xs font-semibold rounded-sm transition-colors duration-150 uppercase ${selectedFleetId === fleet.fleet_id ? 'bg-emerald-500 text-black border-emerald-500' : 'bg-black border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'}`}
-              >
-                {fleet.vehicle_type} ({fleet.fleet_id.slice(0, 8)})
-              </button>
-            ))}
+        <div className="relative max-w-3xl">
+          <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+            Select Fleet Unit for Simulation Route
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              value={fleetQuery}
+              onChange={(event) => {
+                setFleetQuery(event.target.value);
+                setIsDropdownOpen(true);
+              }}
+              onFocus={() => setIsDropdownOpen(true)}
+              onBlur={() => {
+                window.setTimeout(() => setIsDropdownOpen(false), 120);
+              }}
+              placeholder="Search by fleet type or ID"
+              className="w-full rounded-sm border border-zinc-800 bg-black px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500"
+            />
+            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-500">
+              ▾
+            </div>
           </div>
+
+          {isDropdownOpen && (
+            <div className="absolute z-20 mt-2 max-h-64 w-full overflow-y-auto rounded-sm border border-zinc-800 bg-zinc-950 shadow-2xl">
+              {filteredFleets.length > 0 ? (
+                filteredFleets.map((fleet) => {
+                  const isSelected = selectedFleetId === fleet.fleet_id;
+
+                  return (
+                    <button
+                      key={fleet.fleet_id}
+                      type="button"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => {
+                        setSelectedFleetId(fleet.fleet_id);
+                        setFleetQuery(`${fleet.vehicle_type} (${fleet.fleet_id.slice(0, 8)})`);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between px-4 py-3 text-left text-xs uppercase tracking-wide transition-colors ${isSelected ? 'bg-emerald-500 text-black' : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'}`}
+                    >
+                      <span>{fleet.vehicle_type}</span>
+                      <span className="font-mono text-[10px] opacity-80">{fleet.fleet_id.slice(0, 8)}</span>
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="px-4 py-3 text-xs text-zinc-500">No matching fleet found.</div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Status Messaging Panels */}
