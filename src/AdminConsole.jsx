@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AppMenuBar from './AppMenuBar';
-import { PageTitle, TitleIcon } from './AppBrand';
+import { BrandMark } from './AppBrand';
 
 export default function AdminConsole({ apiBaseUrl, menuActions }) {
   const [users, setUsers] = useState([]);
@@ -69,7 +69,7 @@ export default function AdminConsole({ apiBaseUrl, menuActions }) {
   return (
     <div className="min-h-screen w-full bg-black text-zinc-200 antialiased">
       <AppMenuBar
-        leftContent={<PageTitle icon={<TitleIcon type="admin-console" />} title="Admin Console" subtitle="Fleet Operations" />}
+        leftContent={<BrandMark showTitle />}
         actions={menuActions}
       />
 

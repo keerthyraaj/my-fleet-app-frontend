@@ -5,7 +5,7 @@ import FleetScheduleDemo from './FleetScheduleDemo';
 import AdminConsole from './AdminConsole';
 import DashboardPanel from './DashboardPanel';
 import AppMenuBar from './AppMenuBar';
-import { PageTitle, TitleIcon } from './AppBrand';
+import { BrandMark } from './AppBrand';
 
 const VIEW_PATHS = {
   login: '/login',
@@ -369,9 +369,9 @@ function App() {
         active: false
       },
       {
-        key: 'logout',
-        label: 'Logout',
-        onClick: handleLogout,
+        key: 'back-dashboard',
+        label: 'Back to Dashboard',
+        onClick: () => navigateTo('dashboard'),
         active: false
       }
     ];
@@ -379,7 +379,7 @@ function App() {
     return (
       <div className="min-h-screen w-full bg-black text-zinc-100 antialiased">
         <AppMenuBar
-          leftContent={<PageTitle icon={<TitleIcon type="live-status" />} title="Live Status" subtitle="Fleet Operations" />}
+          leftContent={<BrandMark showTitle />}
           actions={menuActions}
         />
         <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -411,9 +411,9 @@ function App() {
         active: true
       },
       {
-        key: 'logout',
-        label: 'Logout',
-        onClick: handleLogout,
+        key: 'back-dashboard',
+        label: 'Back to Dashboard',
+        onClick: () => navigateTo('dashboard'),
         active: false
       }
     ];
@@ -449,9 +449,9 @@ function App() {
         active: false
       },
       {
-        key: 'logout',
-        label: 'Logout',
-        onClick: handleLogout,
+        key: 'back-dashboard',
+        label: 'Back to Dashboard',
+        onClick: () => navigateTo('dashboard'),
         active: false
       }
     ];
@@ -465,16 +465,7 @@ function App() {
 
   return (
     <div className="min-h-screen w-full bg-black text-zinc-200">
-      {(() => {
-        const loginMenuActions = [
-          { key: 'admin-console', label: 'Admin Console', onClick: () => {}, disabled: true, active: false },
-          { key: 'live-status', label: 'Live Status', onClick: () => {}, disabled: true, active: false },
-          { key: 'route-stimulation', label: 'Route Stimulation', onClick: () => {}, disabled: true, active: false },
-          { key: 'logout', label: 'Logout', onClick: () => {}, disabled: true, active: false }
-        ];
-
-        return <AppMenuBar leftContent={<div />} actions={loginMenuActions} />;
-      })()}
+      <AppMenuBar leftContent={<BrandMark showTitle />} actions={[]} />
 
       <div className="flex w-full items-center justify-center p-4 pt-10">
         <div className="w-full max-w-[420px] rounded-sm border border-zinc-900 bg-zinc-950 p-8 shadow-2xl">

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { CircleMarker, MapContainer, Popup, Polyline, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import AppMenuBar from './AppMenuBar';
-import { PageTitle, TitleIcon } from './AppBrand';
+import { BrandMark } from './AppBrand';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
@@ -279,7 +279,7 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, menuActions }) {
   return (
     <div className="min-h-screen w-full bg-black text-zinc-200 antialiased">
       <AppMenuBar
-        leftContent={<PageTitle icon={<TitleIcon type="route-stimulation" />} title="Route Stimulation" subtitle="Fleet Operations" />}
+        leftContent={<BrandMark showTitle />}
         actions={menuActions}
       />
 
