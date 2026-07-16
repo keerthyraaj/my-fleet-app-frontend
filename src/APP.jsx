@@ -4,6 +4,8 @@ import FleetMap from './FleetMap';
 import FleetScheduleDemo from './FleetScheduleDemo';
 import AdminConsole from './AdminConsole';
 import DashboardPanel from './DashboardPanel';
+import AppMenuBar from './AppMenuBar';
+import { PageTitle, TitleIcon } from './AppBrand';
 
 const VIEW_PATHS = {
   login: '/login',
@@ -294,16 +296,41 @@ function App() {
   }
 
   function renderDashboard() {
+    const menuActions = [
+      {
+        key: 'admin-console',
+        label: 'Admin Console',
+        onClick: () => navigateTo('admin-console'),
+        active: activeView === 'admin-console',
+        hidden: loggedInUser?.role !== 'admin'
+      },
+      {
+        key: 'live-status',
+        label: 'Live Status',
+        onClick: handleOpenFleetMap,
+        active: activeView === 'map'
+      },
+      {
+        key: 'route-simulation',
+        label: 'Route Stimulation',
+        onClick: handleOpenFleetScheduleDemo,
+        active: activeView === 'schedule-demo'
+      },
+      {
+        key: 'logout',
+        label: 'Logout',
+        onClick: handleLogout,
+        active: false
+      }
+    ];
+
     return (
       <DashboardPanel
         loggedInUser={loggedInUser}
         isOnline={isOnline}
         dashboardData={dashboardData}
         insightsData={insightsData}
-        onOpenFleetMap={handleOpenFleetMap}
-        onOpenFleetScheduleDemo={handleOpenFleetScheduleDemo}
-        onOpenAdmin={() => navigateTo('admin-console')}
-        onLogout={handleLogout}
+        menuActions={menuActions}
       />
     );
   }
@@ -321,21 +348,41 @@ function App() {
   }
 
   if (loggedInUser && activeView === 'map') {
+    const menuActions = [
+      {
+        key: 'admin-console',
+        label: 'Admin Console',
+        onClick: () => navigateTo('admin-console'),
+        active: false,
+        hidden: loggedInUser?.role !== 'admin'
+      },
+      {
+        key: 'live-status',
+        label: 'Live Status',
+        onClick: handleOpenFleetMap,
+        active: true
+      },
+      {
+        key: 'route-simulation',
+        label: 'Route Stimulation',
+        onClick: handleOpenFleetScheduleDemo,
+        active: false
+      },
+      {
+        key: 'logout',
+        label: 'Logout',
+        onClick: handleLogout,
+        active: false
+      }
+    ];
+
     return (
-      <div className="min-h-screen w-full bg-black px-4 py-6 text-zinc-100 antialiased sm:px-6 lg:px-8">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-          <div className="flex flex-col justify-between gap-4 border-b border-zinc-900 pb-4 sm:flex-row sm:items-center">
-            <div>
-              <h2 className="text-lg font-semibold tracking-tight text-white uppercase">Fleet map</h2>
-              <p className="mt-1 text-xs text-zinc-500">Hover over a dot to see fleet details.</p>
-            </div>
-            <button
-              onClick={() => navigateTo('dashboard')}
-              className="rounded-sm border border-zinc-800 bg-zinc-900 px-4 py-2 text-xs font-medium text-zinc-300 transition-colors duration-150 hover:border-zinc-700 hover:text-white"
-            >
-              Back to dashboard
-            </button>
-          </div>
+      <div className="min-h-screen w-full bg-black text-zinc-100 antialiased">
+        <AppMenuBar
+          leftContent={<PageTitle icon={<TitleIcon type="live-status" />} title="Live Status" subtitle="Fleet Operations" />}
+          actions={menuActions}
+        />
+        <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
           <FleetMap fleets={fleetMapData} />
         </div>
       </div>
@@ -343,17 +390,73 @@ function App() {
   }
 
   if (loggedInUser && activeView === 'schedule-demo') {
+    const menuActions = [
+      {
+        key: 'admin-console',
+        label: 'Admin Console',
+        onClick: () => navigateTo('admin-console'),
+        active: false,
+        hidden: loggedInUser?.role !== 'admin'
+      },
+      {
+        key: 'live-status',
+        label: 'Live Status',
+        onClick: handleOpenFleetMap,
+        active: false
+      },
+      {
+        key: 'route-simulation',
+        label: 'Route Stimulation',
+        onClick: handleOpenFleetScheduleDemo,
+        active: true
+      },
+      {
+        key: 'logout',
+        label: 'Logout',
+        onClick: handleLogout,
+        active: false
+      }
+    ];
+
     return (
       <FleetScheduleDemo
         fleets={fleetMapData}
         apiBaseUrl={apiBaseUrl}
-        onBack={() => navigateTo('dashboard')}
+        menuActions={menuActions}
       />
     );
   }
 
   if (loggedInUser && activeView === 'admin-console') {
-    return <AdminConsole apiBaseUrl={apiBaseUrl} onBack={() => navigateTo('dashboard')} />;
+    const menuActions = [
+      {
+        key: 'admin-console',
+        label: 'Admin Console',
+        onClick: () => navigateTo('admin-console'),
+        active: true,
+        hidden: loggedInUser?.role !== 'admin'
+      },
+      {
+        key: 'live-status',
+        label: 'Live Status',
+        onClick: handleOpenFleetMap,
+        active: false
+      },
+      {
+        key: 'route-simulation',
+        label: 'Route Stimulation',
+        onClick: handleOpenFleetScheduleDemo,
+        active: false
+      },
+      {
+        key: 'logout',
+        label: 'Logout',
+        onClick: handleLogout,
+        active: false
+      }
+    ];
+
+    return <AdminConsole apiBaseUrl={apiBaseUrl} menuActions={menuActions} />;
   }
 
   if (loggedInUser) {
@@ -361,41 +464,54 @@ function App() {
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-black p-4 text-zinc-200">
-      <div className="w-full max-w-[420px] rounded-sm border border-zinc-900 bg-zinc-950 p-8 shadow-2xl">
-        <div className="mb-8 border-b border-zinc-900 pb-4">
-          <h2 className="text-lg font-semibold tracking-tight text-white uppercase">Login</h2>
+    <div className="min-h-screen w-full bg-black text-zinc-200">
+      {(() => {
+        const loginMenuActions = [
+          { key: 'admin-console', label: 'Admin Console', onClick: () => {}, disabled: true, active: false },
+          { key: 'live-status', label: 'Live Status', onClick: () => {}, disabled: true, active: false },
+          { key: 'route-stimulation', label: 'Route Stimulation', onClick: () => {}, disabled: true, active: false },
+          { key: 'logout', label: 'Logout', onClick: () => {}, disabled: true, active: false }
+        ];
+
+        return <AppMenuBar leftContent={<div />} actions={loginMenuActions} />;
+      })()}
+
+      <div className="flex w-full items-center justify-center p-4 pt-10">
+        <div className="w-full max-w-[420px] rounded-sm border border-zinc-900 bg-zinc-950 p-8 shadow-2xl">
+          <div className="mb-8 border-b border-zinc-900 pb-4">
+            <h2 className="text-lg font-semibold tracking-tight text-white uppercase">Login</h2>
+          </div>
+
+          {errorMessage && <p className="mb-4 rounded-sm border border-red-950 bg-red-950/20 p-3 text-xs text-red-400">{errorMessage}</p>}
+
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-zinc-500">Email Address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+                className="w-full rounded-sm border border-zinc-800 bg-black p-3 text-sm text-white transition-colors focus:border-zinc-700 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-zinc-500">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                className="w-full rounded-sm border border-zinc-800 bg-black p-3 text-sm text-white transition-colors focus:border-zinc-700 focus:outline-none"
+              />
+            </div>
+
+            <button type="submit" className="mt-2 w-full rounded-sm bg-emerald-500 py-3 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-200 hover:bg-emerald-400">
+              {isLoading ? 'Logging in...' : 'Login'}
+            </button>
+          </form>
         </div>
-
-        {errorMessage && <p className="mb-4 rounded-sm border border-red-950 bg-red-950/20 p-3 text-xs text-red-400">{errorMessage}</p>}
-
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div>
-            <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-zinc-500">Email Address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-              className="w-full rounded-sm border border-zinc-800 bg-black p-3 text-sm text-white transition-colors focus:border-zinc-700 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-zinc-500">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              className="w-full rounded-sm border border-zinc-800 bg-black p-3 text-sm text-white transition-colors focus:border-zinc-700 focus:outline-none"
-            />
-          </div>
-
-          <button type="submit" className="mt-2 w-full rounded-sm bg-emerald-500 py-3 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-200 hover:bg-emerald-400">
-            {isLoading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
       </div>
     </div>
   );

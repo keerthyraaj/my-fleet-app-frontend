@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { CircleMarker, MapContainer, Popup, Polyline, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import AppMenuBar from './AppMenuBar';
+import { PageTitle, TitleIcon } from './AppBrand';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
@@ -224,7 +226,7 @@ function MapAutoResize({ trigger }) {
   return null;
 }
 
-function FleetScheduleDemo({ fleets, apiBaseUrl, onBack }) {
+function FleetScheduleDemo({ fleets, apiBaseUrl, menuActions }) {
   const [selectedFleetId, setSelectedFleetId] = useState(null);
   const [schedule, setSchedule] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -275,18 +277,13 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, onBack }) {
   const selectedFleet = fleets.find((fleet) => fleet.fleet_id === selectedFleetId) || null;
 
   return (
-    <div className="min-h-screen w-full bg-black px-4 py-6 text-zinc-200 antialiased sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-      {/* Module Title Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-zinc-900 pb-5">
-        <div>
-          <span className="text-[10px] font-bold tracking-widest text-zinc-500 font-mono uppercase block mb-1">Schedule operations Node</span>
-          <h2 className="text-lg font-semibold tracking-tight text-white uppercase font-mono">Schedule demo</h2>
-        </div>
-        <button onClick={onBack} className="px-4 py-2 text-xs font-mono font-bold tracking-wider bg-black border border-zinc-900 text-zinc-400 rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-150">
-          Back to dashboard
-        </button>
-      </div>
+    <div className="min-h-screen w-full bg-black text-zinc-200 antialiased">
+      <AppMenuBar
+        leftContent={<PageTitle icon={<TitleIcon type="route-stimulation" />} title="Route Stimulation" subtitle="Fleet Operations" />}
+        actions={menuActions}
+      />
+
+      <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
       
       <div className="space-y-6">
         {/* Fleet Hardware Selector Layout */}

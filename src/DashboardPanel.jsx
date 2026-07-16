@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import DashboardActiveMap from './DashboardActiveMap';
+import AppMenuBar from './AppMenuBar';
+import { BrandMark } from './AppBrand';
 
 function formatDateTime(value) {
   if (!value) {
@@ -35,10 +37,7 @@ function DashboardPanel({
   isOnline,
   dashboardData,
   insightsData,
-  onOpenFleetMap,
-  onOpenFleetScheduleDemo,
-  onOpenAdmin,
-  onLogout
+  menuActions
 }) {
   const stats = dashboardData?.stats || {};
   const fleetTypes = dashboardData?.fleetTypes || [];
@@ -109,6 +108,11 @@ function DashboardPanel({
 
   return (
     <div className="min-h-screen w-full bg-black text-zinc-100 antialiased">
+      <AppMenuBar
+        leftContent={<BrandMark showTitle />}
+        actions={menuActions}
+      />
+
       <div className="mx-auto flex min-h-screen w-full max-w-[1500px] flex-col px-4 py-6 sm:px-6 lg:px-8">
         {!isOnline && (
           <div className="mb-6 border border-zinc-900 bg-zinc-950 px-4 py-3 text-sm text-zinc-400">
@@ -116,35 +120,10 @@ function DashboardPanel({
           </div>
         )}
 
-        <div className="mb-8 flex flex-col gap-6 border-b border-zinc-900 pb-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mb-8 border-b border-zinc-900 pb-6">
           <div>
             <p className="mb-2 block text-xs font-bold uppercase tracking-[0.3em] text-zinc-500">Fleet operations dashboard</p>
-            <h1 className="text-4xl font-semibold tracking-tight text-white">Welcome, {loggedInUser?.fullName}</h1>
-          </div>
-          <div className="flex flex-wrap gap-3 text-sm">
-            {loggedInUser?.role === 'admin' && (
-              <button
-                onClick={onOpenAdmin}
-                className="rounded-sm border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-black transition-colors duration-150 hover:bg-emerald-400"
-              >
-                Admin Panel
-              </button>
-            )}
-            <button
-              onClick={onOpenFleetMap}
-              className="rounded-sm border border-zinc-800 bg-zinc-900 px-4 py-2 font-medium text-zinc-300 transition-colors duration-150 hover:border-zinc-700 hover:text-white"
-            >
-              Map
-            </button>
-            <button
-              onClick={onOpenFleetScheduleDemo}
-              className="rounded-sm border border-zinc-800 bg-zinc-900 px-4 py-2 font-medium text-zinc-300 transition-colors duration-150 hover:border-zinc-700 hover:text-white"
-            >
-              Schedule Demo
-            </button>
-            <button onClick={onLogout} className="rounded-sm px-4 py-2 text-zinc-500 transition-colors duration-150 hover:text-zinc-300">
-              Logout
-            </button>
+            <h1 className="text-2xl font-semibold tracking-tight text-white">Welcome, {loggedInUser?.fullName}</h1>
           </div>
         </div>
 
@@ -175,20 +154,31 @@ function DashboardPanel({
 
           <div className="rounded-sm border border-zinc-900 bg-zinc-950 p-5 xl:col-span-3">
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-300">Fleet type distribution</h3>
+            <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-zinc-500">Categorical color + direct labels + visual refinement</p>
             {fleetTypes.length > 0 ? (
               <div className="flex h-[360px] items-end gap-4">
-                {fleetTypes.map((item) => (
+                {fleetTypes.map((item, index) => {
+                  const colorPalette = ['#56d9c7', '#f8a46b', '#ad7cf5', '#8ad36b', '#5ea1ff', '#f074a1'];
+                  const barColor = colorPalette[index % colorPalette.length];
+
+                  return (
                   <div key={item.type} className="flex flex-1 flex-col items-center">
                     <div className="flex h-[300px] w-full items-end justify-center">
                       <div
                         style={{ height: `${Math.max((item.count / maxFleetTypeBar) * 100, 5)}%` }}
-                        className="w-full max-w-[40px] rounded-t-sm bg-zinc-700 transition-colors duration-150 hover:bg-emerald-500"
-                      />
+                        className="group relative flex w-full max-w-[52px] items-start justify-center rounded-t-md border border-white/30 pt-3 text-white shadow-[0_0_18px_rgba(255,255,255,0.12)] transition-transform duration-150 hover:-translate-y-1"
+                      >
+                        <div
+                          className="absolute inset-0 rounded-t-md"
+                          style={{ background: `linear-gradient(180deg, ${barColor}, rgba(17,24,39,0.92))` }}
+                        />
+                        <span className="relative z-10 text-2xl font-bold leading-none">{item.count}</span>
+                      </div>
                     </div>
                     <p className="mt-2 w-full truncate text-center text-xs uppercase text-zinc-400">{item.type}</p>
-                    <p className="text-sm font-semibold text-white">{item.count}</p>
                   </div>
-                ))}
+                );
+                })}
               </div>
             ) : (
               <p className="text-sm text-zinc-500">No data available.</p>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import AppMenuBar from './AppMenuBar';
+import { PageTitle, TitleIcon } from './AppBrand';
 
-export default function AdminConsole({ apiBaseUrl, onBack }) {
+export default function AdminConsole({ apiBaseUrl, menuActions }) {
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState('users');
   const [newUser, setNewUser] = useState({ full_name: '', email: '', password: '', role: 'operator' });
@@ -65,16 +67,13 @@ export default function AdminConsole({ apiBaseUrl, onBack }) {
   };
 
   return (
-    <div className="min-h-screen w-full bg-black px-4 py-6 text-zinc-200 antialiased sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-900 pb-5">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight text-white">🛠️ System Administration</h2>
-        </div>
-        <button onClick={onBack} className="px-4 py-2 text-xs font-bold tracking-wider bg-zinc-900 border border-zinc-800 text-zinc-400 rounded-sm hover:border-zinc-700 hover:text-white transition-colors duration-150">
-          Back to Dashboard
-        </button>
-      </div>
+    <div className="min-h-screen w-full bg-black text-zinc-200 antialiased">
+      <AppMenuBar
+        leftContent={<PageTitle icon={<TitleIcon type="admin-console" />} title="Admin Console" subtitle="Fleet Operations" />}
+        actions={menuActions}
+      />
+
+      <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
 
       {msg && <p className="p-3 bg-zinc-900 border border-zinc-800 text-emerald-400 text-xs rounded-sm">{msg}</p>}
 
