@@ -467,7 +467,7 @@ function App() {
     <div className="min-h-screen w-full bg-black text-zinc-200">
       <AppMenuBar leftContent={<BrandMark showTitle />} actions={[]} />
 
-      <div className="flex w-full items-center justify-center p-4 pt-10">
+      <div className="mx-auto w-full max-w-[1500px] px-4 py-10 sm:px-6 lg:px-8">
         <div className="w-full max-w-[420px] rounded-sm border border-zinc-900 bg-zinc-950 p-8 shadow-2xl">
           <div className="mb-8 border-b border-zinc-900 pb-4">
             <h2 className="text-lg font-semibold tracking-tight text-white uppercase">Login</h2>
