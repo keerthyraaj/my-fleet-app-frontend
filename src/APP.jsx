@@ -313,7 +313,8 @@ function App() {
         key: 'admin-console',
         label: 'Admin Console',
         onClick: () => navigateTo('admin-console'),
-        active: activeView === 'admin-console'
+        active: activeView === 'admin-console',
+        hidden: loggedInUser?.role !== 'admin'
       },
       {
         key: 'live-status',
