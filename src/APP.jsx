@@ -4,6 +4,7 @@ import FleetMap from './FleetMap';
 import FleetScheduleDemo from './FleetScheduleDemo';
 import AdminConsole from './AdminConsole';
 import DashboardPanel from './DashboardPanel';
+import MaintenanceCenter from './MaintenanceCenter';
 import AppMenuBar from './AppMenuBar';
 import { BrandMark } from './AppBrand';
 
@@ -12,10 +13,11 @@ const VIEW_PATHS = {
   dashboard: '/dashboard',
   map: '/map',
   'schedule-demo': '/schedule-demo',
+  'maintenance-center': '/maintenance-center',
   'admin-console': '/admin-console'
 };
 
-const PROTECTED_VIEWS = new Set(['dashboard', 'map', 'schedule-demo', 'admin-console']);
+const PROTECTED_VIEWS = new Set(['dashboard', 'map', 'schedule-demo', 'maintenance-center', 'admin-console']);
 
 function getViewFromPath(pathname) {
   switch (pathname) {
@@ -25,6 +27,8 @@ function getViewFromPath(pathname) {
       return 'map';
     case '/schedule-demo':
       return 'schedule-demo';
+    case '/maintenance-center':
+      return 'maintenance-center';
     case '/admin-console':
       return 'admin-console';
     case '/':
@@ -140,7 +144,7 @@ function App() {
       }
 
       const user = await response.json();
-  const resolvedView = nextView;
+      const resolvedView = nextView;
 
       setLoggedInUser({
         fullName: user.fullName,
@@ -151,7 +155,7 @@ function App() {
       setActiveView(resolvedView);
       await Promise.all([fetchDashboardData(), fetchDashboardInsights()]);
 
-      if (resolvedView === 'map' || resolvedView === 'schedule-demo') {
+      if (resolvedView === 'map' || resolvedView === 'schedule-demo' || resolvedView === 'maintenance-center') {
         await fetchFleetMapData();
       }
     } catch (error) {
@@ -185,7 +189,7 @@ function App() {
 
     setActiveView(nextView);
 
-    if (nextView === 'map' || nextView === 'schedule-demo') {
+    if (nextView === 'map' || nextView === 'schedule-demo' || nextView === 'maintenance-center') {
       if (fleetMapData.length === 0) {
         await fetchFleetMapData();
       }
@@ -295,14 +299,21 @@ function App() {
     }
   }
 
+  async function handleOpenMaintenanceCenter() {
+    navigateTo('maintenance-center');
+
+    if (fleetMapData.length === 0) {
+      await fetchFleetMapData();
+    }
+  }
+
   function renderDashboard() {
     const menuActions = [
       {
         key: 'admin-console',
         label: 'Admin Console',
         onClick: () => navigateTo('admin-console'),
-        active: activeView === 'admin-console',
-        hidden: loggedInUser?.role !== 'admin'
+        active: activeView === 'admin-console'
       },
       {
         key: 'live-status',
@@ -311,10 +322,16 @@ function App() {
         active: activeView === 'map'
       },
       {
-        key: 'route-simulation',
+        key: 'route-stimulation',
         label: 'Route Stimulation',
         onClick: handleOpenFleetScheduleDemo,
         active: activeView === 'schedule-demo'
+      },
+      {
+        key: 'maintenance-center',
+        label: 'Maintenance Center',
+        onClick: handleOpenMaintenanceCenter,
+        active: activeView === 'maintenance-center'
       },
       {
         key: 'logout',
@@ -363,9 +380,15 @@ function App() {
         active: true
       },
       {
-        key: 'route-simulation',
+        key: 'route-stimulation',
         label: 'Route Stimulation',
         onClick: handleOpenFleetScheduleDemo,
+        active: false
+      },
+      {
+        key: 'maintenance-center',
+        label: 'Maintenance Center',
+        onClick: handleOpenMaintenanceCenter,
         active: false
       },
       {
@@ -405,10 +428,16 @@ function App() {
         active: false
       },
       {
-        key: 'route-simulation',
+        key: 'route-stimulation',
         label: 'Route Stimulation',
         onClick: handleOpenFleetScheduleDemo,
         active: true
+      },
+      {
+        key: 'maintenance-center',
+        label: 'Maintenance Center',
+        onClick: handleOpenMaintenanceCenter,
+        active: false
       },
       {
         key: 'back-dashboard',
@@ -422,6 +451,49 @@ function App() {
       <FleetScheduleDemo
         fleets={fleetMapData}
         apiBaseUrl={apiBaseUrl}
+        menuActions={menuActions}
+      />
+    );
+  }
+
+  if (loggedInUser && activeView === 'maintenance-center') {
+    const menuActions = [
+      {
+        key: 'admin-console',
+        label: 'Admin Console',
+        onClick: () => navigateTo('admin-console'),
+        active: false,
+        hidden: loggedInUser?.role !== 'admin'
+      },
+      {
+        key: 'live-status',
+        label: 'Live Status',
+        onClick: handleOpenFleetMap,
+        active: false
+      },
+      {
+        key: 'route-stimulation',
+        label: 'Route Stimulation',
+        onClick: handleOpenFleetScheduleDemo,
+        active: false
+      },
+      {
+        key: 'maintenance-center',
+        label: 'Maintenance Center',
+        onClick: handleOpenMaintenanceCenter,
+        active: true
+      },
+      {
+        key: 'back-dashboard',
+        label: 'Back to Dashboard',
+        onClick: () => navigateTo('dashboard'),
+        active: false
+      }
+    ];
+
+    return (
+      <MaintenanceCenter
+        fleets={fleetMapData}
         menuActions={menuActions}
       />
     );
@@ -443,9 +515,15 @@ function App() {
         active: false
       },
       {
-        key: 'route-simulation',
+        key: 'route-stimulation',
         label: 'Route Stimulation',
         onClick: handleOpenFleetScheduleDemo,
+        active: false
+      },
+      {
+        key: 'maintenance-center',
+        label: 'Maintenance Center',
+        onClick: handleOpenMaintenanceCenter,
         active: false
       },
       {
