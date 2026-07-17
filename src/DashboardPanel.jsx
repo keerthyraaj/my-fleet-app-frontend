@@ -154,7 +154,6 @@ function DashboardPanel({
 
           <div className="rounded-sm border border-zinc-900 bg-zinc-950 p-5 xl:col-span-3">
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-300">Fleet type distribution</h3>
-            <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-zinc-500">Categorical color + direct labels + visual refinement</p>
             {fleetTypes.length > 0 ? (
               <div className="flex h-[360px] items-end gap-4">
                 {fleetTypes.map((item, index) => {
