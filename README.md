@@ -98,6 +98,24 @@ This is the standard pattern for web apps because it is:
 
 ## How to run the app
 
+## API configuration (important for mobile)
+Set the frontend API URL with a Vite environment variable instead of hardcoding localhost.
+
+1. Create a `.env` file in the frontend root.
+2. Add `VITE_API_URL` with your backend URL.
+
+Example:
+```bash
+VITE_API_URL=https://my-fleet-app-backend.onrender.com
+```
+
+If you are testing from a phone against a backend running on your laptop, use your laptop LAN IP (not localhost), for example:
+```bash
+VITE_API_URL=http://192.168.1.42:5000
+```
+
+Then restart the frontend dev server so Vite picks up the new variable.
+
 ### Backend
 ```bash
 cd backend

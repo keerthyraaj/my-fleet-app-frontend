@@ -56,7 +56,15 @@ function getViewFromPath(pathname) {
 }
 
 function App() {
-  const apiBaseUrl = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : 'https://my-fleet-app-backend.onrender.com')).replace(/\/$/, '');
+  const configuredApiUrl = (import.meta.env.VITE_API_URL || '').trim();
+  const apiBaseUrl = (configuredApiUrl || 'https://my-fleet-app-backend.onrender.com').replace(/\/$/, '');
+
+  if (!configuredApiUrl) {
+    console.warn('[App] VITE_API_URL is not configured. Falling back to default API URL.', {
+      fallbackUrl: apiBaseUrl,
+      mode: import.meta.env.MODE
+    });
+  }
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -82,6 +90,20 @@ function App() {
     setActiveView(view);
   }
 
+  async function readJsonBody(response, endpoint) {
+    try {
+      return await response.json();
+    } catch (error) {
+      console.error('[API] Failed to parse JSON response.', {
+        endpoint,
+        status: response.status,
+        statusText: response.statusText,
+        error
+      });
+      return null;
+    }
+  }
+
   async function fetchDashboardData() {
     setIsLoading(true);
 
@@ -89,14 +111,26 @@ function App() {
       const response = await fetch(`${apiBaseUrl}/api/dashboard/stats`, {
         credentials: 'include'
       });
-      const data = await response.json();
+      const data = await readJsonBody(response, '/api/dashboard/stats');
 
       if (response.ok) {
         setDashboardData(data);
       } else {
+        console.error('[Dashboard] Failed to fetch stats.', {
+          endpoint: '/api/dashboard/stats',
+          status: response.status,
+          statusText: response.statusText,
+          responseData: data
+        });
         setDashboardData(null);
       }
     } catch (error) {
+      console.error('[Dashboard] Network/CORS error while fetching stats.', {
+        endpoint: '/api/dashboard/stats',
+        apiBaseUrl,
+        isOnline: navigator.onLine,
+        error
+      });
       setDashboardData(null);
     } finally {
       setIsLoading(false);
@@ -108,14 +142,26 @@ function App() {
       const response = await fetch(`${apiBaseUrl}/api/fleets`, {
         credentials: 'include'
       });
-      const data = await response.json();
+      const data = await readJsonBody(response, '/api/fleets');
 
       if (response.ok) {
         setFleetMapData(data.fleets || []);
       } else {
+        console.error('[FleetMap] Failed to fetch fleets.', {
+          endpoint: '/api/fleets',
+          status: response.status,
+          statusText: response.statusText,
+          responseData: data
+        });
         setFleetMapData([]);
       }
     } catch (error) {
+      console.error('[FleetMap] Network/CORS error while fetching fleets.', {
+        endpoint: '/api/fleets',
+        apiBaseUrl,
+        isOnline: navigator.onLine,
+        error
+      });
       setFleetMapData([]);
     }
   }
@@ -125,14 +171,26 @@ function App() {
       const response = await fetch(`${apiBaseUrl}/api/dashboard/insights`, {
         credentials: 'include'
       });
-      const data = await response.json();
+      const data = await readJsonBody(response, '/api/dashboard/insights');
 
       if (response.ok) {
         setInsightsData(data);
       } else {
+        console.error('[Dashboard] Failed to fetch insights.', {
+          endpoint: '/api/dashboard/insights',
+          status: response.status,
+          statusText: response.statusText,
+          responseData: data
+        });
         setInsightsData(null);
       }
     } catch (error) {
+      console.error('[Dashboard] Network/CORS error while fetching insights.', {
+        endpoint: '/api/dashboard/insights',
+        apiBaseUrl,
+        isOnline: navigator.onLine,
+        error
+      });
       setInsightsData(null);
     }
   }
@@ -151,6 +209,12 @@ function App() {
       });
 
       if (!response.ok) {
+        console.error('[Auth] Session restore failed.', {
+          endpoint: '/api/auth/me',
+          status: response.status,
+          statusText: response.statusText,
+          apiBaseUrl
+        });
         setLoggedInUser(null);
         setDashboardData(null);
         setInsightsData(null);
@@ -160,7 +224,17 @@ function App() {
         return;
       }
 
-      const user = await response.json();
+      const user = await readJsonBody(response, '/api/auth/me');
+
+      if (!user) {
+        setLoggedInUser(null);
+        setDashboardData(null);
+        setInsightsData(null);
+        setFleetMapData([]);
+        setErrorMessage('');
+        navigateTo('login', { replace: true });
+        return;
+      }
       const resolvedView = nextView;
 
       setLoggedInUser({
@@ -176,6 +250,12 @@ function App() {
         await fetchFleetMapData();
       }
     } catch (error) {
+      console.error('[Auth] Network/CORS error while restoring session.', {
+        endpoint: '/api/auth/me',
+        apiBaseUrl,
+        isOnline: navigator.onLine,
+        error
+      });
       setLoggedInUser(null);
       setDashboardData(null);
       setInsightsData(null);
@@ -245,7 +325,19 @@ function App() {
   }, [fleetMapData.length, loggedInUser]);
 
   useEffect(() => {
-    void restoreSession();
+    const initializeSession = async () => {
+      try {
+        await restoreSession();
+      } catch (error) {
+        console.error('[App] Unhandled error during initial data fetch.', {
+          apiBaseUrl,
+          isOnline: navigator.onLine,
+          error
+        });
+      }
+    };
+
+    void initializeSession();
   }, []);
 
   async function submitLogin(nextEmail, nextPassword) {
@@ -261,10 +353,16 @@ function App() {
         body: JSON.stringify({ email: nextEmail, password: nextPassword })
       });
 
-      const data = await response.json();
+      const data = await readJsonBody(response, '/api/login');
 
       if (!response.ok) {
-        setErrorMessage(data.message || 'Unable to log in.');
+        setErrorMessage(data?.message || 'Unable to log in.');
+        console.error('[Auth] Login failed.', {
+          endpoint: '/api/login',
+          status: response.status,
+          statusText: response.statusText,
+          responseData: data
+        });
         return;
       }
 
