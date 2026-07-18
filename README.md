@@ -99,12 +99,27 @@ This is the standard pattern for web apps because it is:
 ## How to run the app
 
 ## API configuration (important for mobile)
-Set the frontend API URL with a Vite environment variable instead of hardcoding localhost.
+By default, this frontend uses same-origin `/api` requests. On Vercel, `vercel.json` rewrites these requests to the backend.
+
+This avoids third-party cookie problems on mobile browsers when using session auth.
+
+Only set `VITE_API_URL` if you intentionally want direct backend calls.
 
 1. Create a `.env` file in the frontend root.
-2. Add `VITE_API_URL` with your backend URL.
+2. Keep `VITE_API_URL` empty (recommended), or set it explicitly.
 
-Example:
+Recommended (same-origin proxy mode):
+```bash
+VITE_API_URL=
+```
+
+Production builds use same-origin proxy mode by default, even if `VITE_API_URL` exists.
+If you explicitly want direct cross-origin API calls in production, set:
+```bash
+VITE_ALLOW_DIRECT_API_IN_PROD=true
+```
+
+Explicit backend mode example:
 ```bash
 VITE_API_URL=https://my-fleet-app-backend.onrender.com
 ```

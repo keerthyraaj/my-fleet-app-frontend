@@ -57,11 +57,18 @@ function getViewFromPath(pathname) {
 
 function App() {
   const configuredApiUrl = (import.meta.env.VITE_API_URL || '').trim();
-  const apiBaseUrl = (configuredApiUrl || 'https://my-fleet-app-backend.onrender.com').replace(/\/$/, '');
+  const allowDirectApiInProd = import.meta.env.VITE_ALLOW_DIRECT_API_IN_PROD === 'true';
+  const useSameOriginApi = import.meta.env.PROD && !allowDirectApiInProd;
+  const apiBaseUrl = useSameOriginApi ? '' : configuredApiUrl.replace(/\/$/, '');
 
-  if (!configuredApiUrl) {
-    console.warn('[App] VITE_API_URL is not configured. Falling back to default API URL.', {
-      fallbackUrl: apiBaseUrl,
+  if (useSameOriginApi) {
+    console.warn('[App] Production is using same-origin /api requests via proxy.', {
+      allowDirectApiInProd,
+      mode: import.meta.env.MODE
+    });
+  } else if (!configuredApiUrl) {
+    console.warn('[App] VITE_API_URL is not configured. Using same-origin /api requests.', {
+      requestBase: '/api',
       mode: import.meta.env.MODE
     });
   }
