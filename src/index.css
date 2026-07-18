@@ -37,3 +37,11 @@ select,
 textarea {
   font: inherit;
 }
+
+.app-menu-bar__action {
+  white-space: nowrap;
+}
+
+.app-menu-bar__mobile-panel {
+  will-change: max-height, opacity;
+}
