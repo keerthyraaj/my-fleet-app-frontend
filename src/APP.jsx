@@ -56,19 +56,23 @@ function getViewFromPath(pathname) {
 }
 
 function App() {
-  const configuredApiUrl = (import.meta.env.VITE_API_URL || '').trim();
-  const allowDirectApiInProd = import.meta.env.VITE_ALLOW_DIRECT_API_IN_PROD === 'true';
-  const useSameOriginApi = import.meta.env.PROD && !allowDirectApiInProd;
-  const apiBaseUrl = useSameOriginApi ? '' : configuredApiUrl.replace(/\/$/, '');
+  const configuredApiUrl = (import.meta.env.VITE_API_URL || '').trim().replace(/\/$/, '');
+  const hasAbsoluteConfiguredApiUrl = /^https?:\/\//i.test(configuredApiUrl);
+  const apiBaseUrl = hasAbsoluteConfiguredApiUrl ? configuredApiUrl : '';
 
-  if (useSameOriginApi) {
-    console.warn('[App] Production is using same-origin /api requests via proxy.', {
-      allowDirectApiInProd,
+  if (hasAbsoluteConfiguredApiUrl) {
+    console.warn('[App] Using configured absolute API base URL for authenticated requests.', {
+      apiBaseUrl,
       mode: import.meta.env.MODE
     });
   } else if (!configuredApiUrl) {
     console.warn('[App] VITE_API_URL is not configured. Using same-origin /api requests.', {
       requestBase: '/api',
+      mode: import.meta.env.MODE
+    });
+  } else {
+    console.warn('[App] VITE_API_URL is not absolute. Falling back to same-origin /api requests.', {
+      configuredApiUrl,
       mode: import.meta.env.MODE
     });
   }
