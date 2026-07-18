@@ -19,6 +19,23 @@ const VIEW_PATHS = {
 
 const PROTECTED_VIEWS = new Set(['dashboard', 'map', 'schedule-demo', 'maintenance-center', 'admin-console']);
 
+const QUICK_LOGIN_OPTIONS = [
+  {
+    key: 'admin',
+    title: 'Admin Access',
+    email: 'amit.sharma@example.com',
+    password: 'password123',
+    buttonLabel: 'Login as Admin'
+  },
+  {
+    key: 'operator',
+    title: 'Operator Access',
+    email: 'gaurav.gupta@example.com',
+    password: 'password123',
+    buttonLabel: 'Login as Operator'
+  }
+];
+
 function getViewFromPath(pathname) {
   switch (pathname) {
     case '/dashboard':
@@ -231,17 +248,17 @@ function App() {
     void restoreSession();
   }, []);
 
-  async function handleLogin(event) {
-    event.preventDefault();
+  async function submitLogin(nextEmail, nextPassword) {
     setErrorMessage('');
     setDashboardData(null);
+    setIsLoading(true);
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email: nextEmail, password: nextPassword })
       });
 
       const data = await response.json();
@@ -254,14 +271,27 @@ function App() {
       setLoggedInUser({
         fullName: data.fullName,
         role: data.role,
-        email
+        email: nextEmail
       });
 
       navigateTo('dashboard', { replace: true });
       await Promise.all([fetchDashboardData(), fetchDashboardInsights()]);
     } catch (error) {
       setErrorMessage('Could not connect to the server.');
+    } finally {
+      setIsLoading(false);
     }
+  }
+
+  async function handleLogin(event) {
+    event.preventDefault();
+    await submitLogin(email, password);
+  }
+
+  async function handleQuickLogin(nextEmail, nextPassword) {
+    setEmail(nextEmail);
+    setPassword(nextPassword);
+    await submitLogin(nextEmail, nextPassword);
   }
 
   async function handleLogout() {
@@ -542,45 +572,85 @@ function App() {
     return renderDashboard();
   }
 
+  const loginCardClassName = 'w-full rounded-sm border border-zinc-900 bg-zinc-950 p-8 shadow-2xl';
+  const readOnlyInputClassName = 'w-full rounded-sm border border-zinc-800 bg-white/10 p-3 text-sm text-zinc-200';
+
   return (
     <div className="min-h-screen w-full bg-black text-zinc-200">
       <AppMenuBar leftContent={<BrandMark showTitle />} actions={[]} />
 
       <div className="mx-auto w-full max-w-[1500px] px-4 py-10 sm:px-6 lg:px-8">
-        <div className="w-full max-w-[420px] rounded-sm border border-zinc-900 bg-zinc-950 p-8 shadow-2xl">
-          <div className="mb-8 border-b border-zinc-900 pb-4">
-            <h2 className="text-lg font-semibold tracking-tight text-white uppercase">Login</h2>
+        <div className="mx-auto grid w-full max-w-[1080px] gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.25fr)]">
+          <div className={loginCardClassName}>
+            <div className="mb-8 border-b border-zinc-900 pb-4">
+              <h2 className="text-lg font-semibold tracking-tight text-white uppercase">Secure Login</h2>
+            </div>
+
+            {errorMessage && <p className="mb-4 rounded-sm border border-red-950 bg-red-950/20 p-3 text-xs text-red-400">{errorMessage}</p>}
+
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div>
+                <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-zinc-500">Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                  className="w-full rounded-sm border border-zinc-800 bg-black p-3 text-sm text-white transition-colors focus:border-zinc-700 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-zinc-500">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                  className="w-full rounded-sm border border-zinc-800 bg-black p-3 text-sm text-white transition-colors focus:border-zinc-700 focus:outline-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="mt-2 w-full rounded-sm bg-emerald-500 py-3 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-200 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-500/70"
+              >
+                {isLoading ? 'Logging in...' : 'Login'}
+              </button>
+            </form>
           </div>
 
-          {errorMessage && <p className="mb-4 rounded-sm border border-red-950 bg-red-950/20 p-3 text-xs text-red-400">{errorMessage}</p>}
+          <div className="grid gap-8 md:grid-cols-2">
+            {QUICK_LOGIN_OPTIONS.map((option) => (
+              <section key={option.key} className={loginCardClassName}>
+                <div className="mb-8 border-b border-zinc-900 pb-4">
+                  <h2 className="text-lg font-semibold tracking-tight text-white uppercase">{option.title}</h2>
+                </div>
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-zinc-500">Email Address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-                className="w-full rounded-sm border border-zinc-800 bg-black p-3 text-sm text-white transition-colors focus:border-zinc-700 focus:outline-none"
-              />
-            </div>
+                <div className="space-y-5">
+                  <div>
+                    <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-zinc-500">Email</label>
+                    <input type="text" value={option.email} readOnly className={readOnlyInputClassName} />
+                  </div>
 
-            <div>
-              <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-zinc-500">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-                className="w-full rounded-sm border border-zinc-800 bg-black p-3 text-sm text-white transition-colors focus:border-zinc-700 focus:outline-none"
-              />
-            </div>
+                  <div>
+                    <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-zinc-500">Password</label>
+                    <input type="text" value={option.password} readOnly className={readOnlyInputClassName} />
+                  </div>
 
-            <button type="submit" className="mt-2 w-full rounded-sm bg-emerald-500 py-3 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-200 hover:bg-emerald-400">
-              {isLoading ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
+                  <button
+                    type="button"
+                    disabled={isLoading}
+                    onClick={() => void handleQuickLogin(option.email, option.password)}
+                    className="mt-2 w-full rounded-sm bg-emerald-500 py-3 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-200 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-500/70"
+                  >
+                    {isLoading ? 'Logging in...' : option.buttonLabel}
+                  </button>
+                </div>
+              </section>
+            ))}
+          </div>
         </div>
       </div>
     </div>

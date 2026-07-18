@@ -1,6 +1,6 @@
 {
-  "name": "Fleet Management System",
-  "short_name": "FleetTrack",
+  "name": "MULTIBOTIX",
+  "short_name": "MULTIBOTIX",
   "description": "Real-time tracking and dispatch console for sweeper, mower, and snow cleaner fleets.",
   "start_url": "/",
   "display": "standalone",
