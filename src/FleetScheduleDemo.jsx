@@ -8,6 +8,38 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import 'leaflet-routing-machine';
 
+const ABSOLUTE_RENDER_API_BASE_URL = (
+  import.meta.env.VITE_SCHEDULE_DEMO_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  'https://<YOUR-RENDER-BACKEND-URL>.onrender.com'
+)
+  .trim()
+  .replace(/\/$/, '')
+  .replace(/\/api$/, '');
+
+function resolveAbsoluteApiBaseUrl(apiBaseUrl) {
+  const normalizedBaseUrl = (apiBaseUrl || '').trim().replace(/\/$/, '').replace(/\/api$/, '');
+
+  if (/^https?:\/\//i.test(normalizedBaseUrl)) {
+    return normalizedBaseUrl;
+  }
+
+  return ABSOLUTE_RENDER_API_BASE_URL;
+}
+
+function hasValidRouteCoordinates(schedule) {
+  if (!schedule) {
+    return false;
+  }
+
+  const startLat = Number(schedule.start_lat);
+  const startLong = Number(schedule.start_long);
+  const endLat = Number(schedule.end_lat);
+  const endLong = Number(schedule.end_long);
+
+  return [startLat, startLong, endLat, endLong].every((value) => Number.isFinite(value));
+}
+
 function formatTimestamp(value) {
   if (!value) {
     return 'Not available';
@@ -216,6 +248,11 @@ function MapAutoResize({ trigger }) {
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
       map.invalidateSize();
+      console.log('[FleetScheduleDemo] Map invalidateSize triggered.', {
+        trigger,
+        mapSize: map.getSize(),
+        center: map.getCenter(),
+      });
     });
 
     return () => {
@@ -233,6 +270,7 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, menuActions }) {
   const [schedule, setSchedule] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const resolvedApiBaseUrl = resolveAbsoluteApiBaseUrl(apiBaseUrl);
 
   useEffect(() => {
     if (!fleets.length) {
@@ -258,36 +296,109 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, menuActions }) {
   });
 
   useEffect(() => {
-    if (!selectedFleetId || !apiBaseUrl) {
+    if (schedule) {
+      console.log('[FleetScheduleDemo] Schedule state updated.', schedule);
+    }
+  }, [schedule]);
+
+  useEffect(() => {
+    const hasSchedule = Boolean(schedule);
+    const isMapRenderable = hasSchedule && hasValidRouteCoordinates(schedule) && !isLoading;
+
+    console.log('[FleetScheduleDemo] Render chain status.', {
+      selectedFleetId,
+      hasSchedule,
+      isLoading,
+      isMapRenderable,
+      errorMessage,
+    });
+  }, [selectedFleetId, schedule, isLoading, errorMessage]);
+
+  useEffect(() => {
+    if (!selectedFleetId) {
       return;
     }
 
     const loadSchedule = async () => {
       setIsLoading(true);
       setErrorMessage('');
+      const requestUrl = `${resolvedApiBaseUrl}/api/fleet_schedule_demo/${selectedFleetId}`;
+
+      console.log('[FleetScheduleDemo] Fetching schedule data.', {
+        selectedFleetId,
+        requestUrl,
+        apiBaseUrl,
+        resolvedApiBaseUrl,
+      });
 
       try {
-        const response = await fetch(`${apiBaseUrl}/api/fleet_schedule_demo/${selectedFleetId}`, {
+        const response = await fetch(requestUrl, {
+          mode: 'cors',
           credentials: 'include',
         });
-        const data = await response.json();
+        let data = null;
+
+        try {
+          data = await response.json();
+        } catch (parseError) {
+          console.error('[FleetScheduleDemo] Failed to parse schedule response JSON.', {
+            requestUrl,
+            status: response.status,
+            statusText: response.statusText,
+            parseError,
+          });
+        }
 
         if (response.ok) {
-          setSchedule(data.schedule);
+          if (data?.schedule) {
+            setSchedule(data.schedule);
+            console.log('[FleetScheduleDemo] Schedule fetch succeeded.', {
+              requestUrl,
+              scheduleId: data.schedule.schedule_id,
+              startLat: data.schedule.start_lat,
+              startLong: data.schedule.start_long,
+              endLat: data.schedule.end_lat,
+              endLong: data.schedule.end_long,
+            });
+          } else {
+            setSchedule(null);
+            setErrorMessage('Schedule API responded without schedule payload.');
+            console.error('[FleetScheduleDemo] Schedule response missing schedule payload.', {
+              requestUrl,
+              response,
+              data,
+            });
+          }
         } else {
           setSchedule(null);
           setErrorMessage(data.message || 'No schedule was found for this fleet.');
+          console.error('[FleetScheduleDemo] Schedule fetch failed with non-2xx response.', {
+            requestUrl,
+            status: response.status,
+            statusText: response.statusText,
+            data,
+          });
         }
       } catch (error) {
         setSchedule(null);
         setErrorMessage('Unable to load the demo route right now.');
+        console.error('[FleetScheduleDemo] Schedule fetch threw an exception.', {
+          requestUrl,
+          error,
+          name: error?.name,
+          message: error?.message,
+          stack: error?.stack,
+          cause: error?.cause,
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
     loadSchedule();
-  }, [apiBaseUrl, selectedFleetId]);
+  }, [apiBaseUrl, resolvedApiBaseUrl, selectedFleetId]);
+
+  const hasRenderableSchedule = Boolean(schedule) && hasValidRouteCoordinates(schedule) && !isLoading;
 
   return (
     <div className="min-h-screen w-full bg-black text-zinc-200 antialiased">
@@ -367,7 +478,13 @@ function FleetScheduleDemo({ fleets, apiBaseUrl, menuActions }) {
         )}
 
         {/* Live Map Canvas Component Frame */}
-        {schedule && !isLoading && (
+        {schedule && !hasValidRouteCoordinates(schedule) && !isLoading && (
+          <div className="p-4 bg-zinc-900 border border-zinc-800 text-zinc-500 text-xs font-mono rounded-sm">
+            STATUS LOG: Schedule loaded but map coordinates are invalid. Check browser console logs.
+          </div>
+        )}
+
+        {hasRenderableSchedule && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-black border border-zinc-900 p-4 rounded-sm font-mono text-xs text-zinc-400">
               <div><span className="text-zinc-600">SCHEDULE ID:</span> <span className="text-zinc-200 font-semibold">{schedule.schedule_id}</span></div>
